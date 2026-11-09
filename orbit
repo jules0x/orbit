@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# DDev Orbit launcher
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export PYTHONPATH="$DIR:$PYTHONPATH"
+PYTHON_BIN="/opt/homebrew/bin/python3"
+if [ ! -f "$PYTHON_BIN" ]; then
+    PYTHON_BIN="python3"
+fi
+
+case "$1" in
+    ui|serve|web|"")
+        echo "Starting DDev & Disk Orbit Web Dashboard..."
+        exec "$PYTHON_BIN" "$DIR/server.py" "$2"
+        ;;
+    scan|summary)
+        exec "$PYTHON_BIN" "$DIR/scanner.py"
+        ;;
+    dumps)
+        exec "$PYTHON_BIN" -c "
+from scanner import full_audit, format_bytes
+data = full_audit()
+dumps = data['db_dumps']['dumps']
+print(f'=== DATABASE DUMPS & BACKUPS ({len(dumps)} found, {data[\"db_dumps\"][\"total_dumps_size_str\"]}) ===\n')
+print(f'{\"SIZE\":<10} | {\"AGE\":<10} | {\"LOCATION\":<18} | {\"NAME\"}')
+print('-' * 80)
+for d in dumps[:30]:
+    print(f'{d[\"size_str\"]: <10} | {str(d[\"age_days\"]) + \"d\":<10} | {d[\"location\"]: <18} | {d[\"name\"]}')
+if len(dumps) > 30:
+    print(f'... and {len(dumps) - 30} more dumps')
+"
+        ;;
+    ddev|docker)
+        exec "$PYTHON_BIN" -c "
+from scanner import full_audit
+data = full_audit()
+overview = data['overview']
+docker = data['docker']
+print(f'=== DDEV & DOCKER / COLIMA OVERVIEW ===\n')
+print(f'Colima datadisk allocated: {overview[\"colima_allocated_str\"]}')
+print(f'Active containers: {len(docker[\"running_containers\"])}')
+print(f'Docker volumes: {docker[\"total_volumes\"]}')
+print(f'Docker images: {docker[\"total_images\"]}')
+print(f'Registered DDEV projects: {data[\"projects_count\"]}')
+print('\nRunning DDEV Containers:')
+for c in docker['running_containers']:
+    print(f'  • {c}')
+"
+        ;;
+    help|--help|-h)
+        echo "DDev & Disk Orbit"
+        echo ""
+        echo "Usage: ./orbit [command]"
+        echo ""
+        echo "Commands:"
+        echo "  ui           Start the web dashboard and open in browser (default)"
+        echo "  scan         Run instant terminal audit"
+        echo "  dumps        List all database dumps with sizes and ages"
+        echo "  ddev         Inspect Colima VM, Docker volumes, and running containers"
+        echo "  help         Show this help message"
+        ;;
+    *)
+        exec "$PYTHON_BIN" "$DIR/server.py" "$@"
+        ;;
+esac
