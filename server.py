@@ -10,6 +10,7 @@ import re
 import json
 import time
 import shutil
+import shlex
 import subprocess
 import urllib.parse
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
@@ -147,9 +148,12 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, HEAD")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
+
+    def do_HEAD(self):
+        self.do_GET()
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -172,6 +176,42 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
             self.send_json(200, DATA_CACHE)
             return
 
+        if path == "/api/project_logo":
+            params = urllib.parse.parse_qs(parsed.query)
+            proj_name = params.get("name", [""])[0]
+            if DATA_CACHE and "projects" in DATA_CACHE and proj_name in DATA_CACHE["projects"]:
+                pdata = DATA_CACHE["projects"][proj_name]
+                branding = pdata.get("branding", {})
+                logo_path = branding.get("logo_path")
+                if logo_path and os.path.isfile(logo_path):
+                    content_type = "image/png"
+                    fl = logo_path.lower()
+                    if fl.endswith(".svg"):
+                        content_type = "image/svg+xml"
+                    elif fl.endswith(".ico"):
+                        content_type = "image/x-icon"
+                    elif fl.endswith(".webp"):
+                        content_type = "image/webp"
+                    elif fl.endswith((".jpg", ".jpeg")):
+                        content_type = "image/jpeg"
+
+                    try:
+                        with open(logo_path, "rb") as f:
+                            content = f.read()
+                        self.send_response(200)
+                        self.send_header("Content-Type", content_type)
+                        self.send_header("Content-Length", str(len(content)))
+                        self.send_header("Cache-Control", "public, max-age=3600")
+                        self.end_headers()
+                        self.wfile.write(content)
+                        return
+                    except Exception as e:
+                        self.send_error(500, f"Error reading logo: {e}")
+                        return
+
+            self.send_error(404, "Logo not found")
+            return
+
         # Static files
         static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
         req_path = path.lstrip("/")
@@ -189,6 +229,10 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                 content_type = "application/json"
             elif file_path.endswith(".svg"):
                 content_type = "image/svg+xml"
+            elif file_path.endswith(".ico"):
+                content_type = "image/x-icon"
+            elif file_path.endswith(".png"):
+                content_type = "image/png"
 
             try:
                 with open(file_path, "rb") as f:
@@ -196,6 +240,8 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-Type", content_type)
                 self.send_header("Content-Length", str(len(content)))
+                if any(file_path.endswith(ext) for ext in [".ico", ".png", ".svg", ".css", ".js"]):
+                    self.send_header("Cache-Control", "public, max-age=86400")
                 self.end_headers()
                 self.wfile.write(content)
             except Exception as e:
@@ -428,7 +474,7 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     self.send_json(500, {"error": str(e)})
                 return
-            elif action == "ddev_start_everything":
+            elif action in ("ddev_start_everything", "ddev_setup_project"):
                 if not target or not re.match(r"^[a-zA-Z0-9_\.-]+$", target):
                     self.send_json(400, {"error": "Invalid project name"})
                     return
@@ -441,7 +487,7 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                 p_colima_stat = subprocess.run(["colima", "status"], env=env, capture_output=True, text=True)
                 colima_running = ("running" in p_colima_stat.stdout.lower() or "running" in p_colima_stat.stderr.lower())
                 if not colima_running:
-                    steps_log.append("▶ Step 1/3: Starting Colima VM runtime...")
+                    steps_log.append("▶ Step 1/4: Starting Colima VM runtime...")
                     c_start = subprocess.run(["colima", "start"], env=env, capture_output=True, text=True, timeout=120)
                     if c_start.returncode != 0:
                         steps_log.append(f"✖ Failed to start Colima:\n{c_start.stderr}")
@@ -466,10 +512,10 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                 profile = req_json.get("profile", "").strip() or proj_data.get("search", {}).get("profile", "")
                 if profile:
                     start_cmd = ["ddev", "start", target, f"--profiles={profile}"]
-                    steps_log.append(f"▶ Step 2/3: Starting DDEV project '{target}' with search profile '{profile}'...")
+                    steps_log.append(f"▶ Step 2/4: Starting DDEV project '{target}' with search profile '{profile}'...")
                 else:
                     start_cmd = ["ddev", "start", target]
-                    steps_log.append(f"▶ Step 2/3: Starting DDEV project '{target}'...")
+                    steps_log.append(f"▶ Step 2/4: Starting DDEV project '{target}'...")
 
                 ddev_start = subprocess.run(start_cmd, env=env, capture_output=True, text=True, timeout=300)
                 if ddev_start.returncode != 0:
@@ -478,13 +524,32 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                 else:
                     steps_log.append(f"✔ DDEV containers active.")
 
-                # Step 3: Check dist status and build if missing
+                # Locate approot
                 approot = proj_data.get("approot")
                 if not approot or not os.path.isdir(approot):
                     cand = os.path.join(SITES_DIR, target)
                     if os.path.isdir(cand):
                         approot = cand
 
+                # Step 3: Run project setup (dset: composer install && dev/build && vendor-expose)
+                if approot and os.path.isdir(approot) and overall_success:
+                    steps_log.append("▶ Step 3/4: Running project setup (`dset`: composer install, dev/build, vendor-expose)...")
+                    # Try user's interactive zsh alias 'dset' first, falling back to direct ddev exec sequence
+                    dset_res = subprocess.run(["zsh", "-i", "-c", f"cd '{approot}' && dset"], env=env, capture_output=True, text=True, timeout=600)
+                    if dset_res.returncode != 0:
+                        # Fallback to direct ddev exec sequence
+                        fallback_cmd = "ddev exec 'composer install' && ddev exec 'vendor/bin/sake dev/build flush=all' && ddev exec 'composer vendor-expose'"
+                        dset_res = subprocess.run(["bash", "-c", fallback_cmd], cwd=approot, env=env, capture_output=True, text=True, timeout=600)
+
+                    if dset_res.returncode == 0:
+                        steps_log.append("✔ Project setup (`dset`) completed successfully.")
+                    else:
+                        out_snippet = (dset_res.stderr or dset_res.stdout or "Setup exited with code non-zero").strip()
+                        if len(out_snippet) > 800:
+                            out_snippet = out_snippet[-800:]
+                        steps_log.append(f"⚠ Setup output:\n{out_snippet}")
+
+                # Step 4: Check dist status and build if missing
                 dist_info = proj_data.get("dist", {})
                 is_built = dist_info.get("is_built", True)
                 force_build = req_json.get("force_dist_build", False)
@@ -494,7 +559,7 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                     if not build_cmd:
                         build_cmd = "make buildall" if os.path.isfile(os.path.join(approot, "Makefile")) else "npm run build"
 
-                    steps_log.append(f"▶ Step 3/3: Dist assets missing/requested. Building frontend assets ({build_cmd})...")
+                    steps_log.append(f"▶ Step 4/4: Building frontend assets ({build_cmd})...")
                     b_proc = subprocess.run(["bash", "-c", build_cmd], cwd=approot, env=env, capture_output=True, text=True, timeout=300)
                     if b_proc.returncode != 0:
                         steps_log.append(f"⚠ Build warning/error:\n{b_proc.stderr or b_proc.stdout}")
@@ -504,7 +569,7 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                     steps_log.append("✔ Frontend dist already built and ready.")
 
                 dur = round(time.time() - t0, 2)
-                steps_log.append(f"\n✨ Project '{target}' is ready! ({dur}s total)")
+                steps_log.append(f"\n✨ Project '{target}' is fully set up and ready! ({dur}s total)")
 
                 Thread(target=update_scan_cache, args=(True,), daemon=True).start()
                 self.send_json(200, {
@@ -513,11 +578,116 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                     "stdout": "\n".join(steps_log),
                     "stderr": "",
                     "duration": dur,
-                    "command": " ".join(start_cmd)
+                    "command": f"ddev start {target} && dset"
                 })
                 return
             elif action == "docker_prune_images":
                 cmd = ["docker", "image", "prune", "-af"]
+            elif action == "docker_prune_dangling_images":
+                cmd = ["docker", "image", "prune", "-f"]
+            elif action == "docker_rmi":
+                if not target or not re.match(r"^[a-zA-Z0-9_\.:/ -]+$", target):
+                    self.send_json(400, {"error": "Invalid image name or ID"})
+                    return
+                cmd = ["docker", "rmi", target]
+            elif action == "docker_logs":
+                if not target or not re.match(r"^[a-zA-Z0-9_\.-]+$", target):
+                    self.send_json(400, {"error": "Invalid container name"})
+                    return
+                tail = req_json.get("tail", 150)
+                try:
+                    tail = max(10, min(2000, int(tail)))
+                except Exception:
+                    tail = 150
+                cmd = ["docker", "logs", "--tail", str(tail), target]
+            elif action == "open_database":
+                if not target or not re.match(r"^[a-zA-Z0-9_\.-]+$", target):
+                    self.send_json(400, {"error": "Invalid project name"})
+                    return
+                approot = req_json.get("approot", "").strip()
+                cd_dir = approot if (approot and os.path.isdir(approot)) else os.path.expanduser(f"~/Sites/{target}")
+
+                # Launch Sequel Ace directly in background via ddev sequelace (no terminal window required!)
+                try:
+                    res = subprocess.run(["ddev", "sequelace"], cwd=cd_dir, env=env, capture_output=True, text=True, timeout=15)
+                    if res.returncode == 0:
+                        self.send_json(200, {
+                            "success": True,
+                            "stdout": f"Opened Sequel Ace for {target}",
+                            "stderr": ""
+                        })
+                        return
+                except Exception:
+                    pass
+
+                # Fallback: run zsh alias headlessly in background
+                try:
+                    res = subprocess.run(["zsh", "-i", "-c", f"cd {shlex.quote(cd_dir)} && dsa"], env=env, capture_output=True, text=True, timeout=15)
+                    self.send_json(200, {
+                        "success": res.returncode == 0,
+                        "stdout": f"Opened Sequel Ace for {target}",
+                        "stderr": res.stderr
+                    })
+                except Exception as ex:
+                    self.send_json(500, {"error": f"Failed to launch Sequel Ace: {str(ex)}"})
+                return
+            elif action == "launch_terminal":
+                command = req_json.get("command", "").strip()
+                approot = req_json.get("approot", "").strip()
+                cd_dir = approot if (approot and os.path.isdir(approot)) else HOME
+
+                # Check for iTerm availability on macOS
+                has_iterm = True
+                try:
+                    check_iterm = subprocess.run(["osascript", "-e", 'id of application "iTerm"'], capture_output=True, text=True, timeout=2)
+                    has_iterm = (check_iterm.returncode == 0)
+                except Exception:
+                    has_iterm = False
+
+                full_cmd = f"cd {shlex.quote(cd_dir)}"
+                if command:
+                    full_cmd += f" && {command}"
+
+                escaped_cmd = full_cmd.replace('\\', '\\\\').replace('"', '\\"')
+
+                if has_iterm:
+                    osa_script = f'''tell application "iTerm"
+    activate
+    if (count of windows) = 0 then
+        create window with default profile
+    else
+        tell current window
+            create tab with default profile
+        end tell
+    end if
+    tell current session of current window
+        write text "{escaped_cmd}"
+    end tell
+end tell'''
+                else:
+                    osa_script = f'''tell application "Terminal"
+    activate
+    do script "{escaped_cmd}"
+end tell'''
+
+                try:
+                    res = subprocess.run(["osascript", "-e", osa_script], capture_output=True, text=True, timeout=5)
+                    self.send_json(200, {
+                        "success": res.returncode == 0,
+                        "exit_code": res.returncode,
+                        "stdout": f"Opened iTerm in {cd_dir}" + (f": {command}" if command else ""),
+                        "stderr": res.stderr,
+                        "command": command or f"cd {cd_dir}"
+                    })
+                except Exception as ex:
+                    self.send_json(200, {
+                        "success": False,
+                        "exit_code": 1,
+                        "stdout": f"iTerm launch attempted: {command}",
+                        "stderr": str(ex),
+                        "command": command
+                    })
+                return
             elif action == "docker_builder_prune":
                 cmd = ["docker", "builder", "prune", "-af"]
             elif action == "docker_prune_containers":
@@ -526,6 +696,20 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                 cmd = ["docker", "volume", "prune", "-f"]
             elif action == "ddev_stop_all":
                 cmd = ["ddev", "stop", "--all"]
+            elif action == "ddev_logs":
+                if not target or not re.match(r"^[a-zA-Z0-9_\.-]+$", target):
+                    self.send_json(400, {"error": "Invalid project name"})
+                    return
+                service = req_json.get("service", "web")
+                tail = req_json.get("tail", 150)
+                try:
+                    tail = max(10, min(2000, int(tail)))
+                except Exception:
+                    tail = 150
+                if service and service != "all":
+                    cmd = ["ddev", "logs", "-s", service, "--tail", str(tail), target]
+                else:
+                    cmd = ["ddev", "logs", "--tail", str(tail), target]
             elif action == "ddev_stop_project":
                 if not target or not re.match(r"^[a-zA-Z0-9_\.-]+$", target):
                     self.send_json(400, {"error": "Invalid project name"})
@@ -632,6 +816,27 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
             try:
                 proc = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=300)
                 dur = round(time.time() - t0, 2)
+
+                # Graceful fallback for ddev_logs when a container is not currently running
+                combined_output = (proc.stdout or "") + (proc.stderr or "")
+                if action == "ddev_logs" and ("No running service container" in combined_output or (proc.returncode != 0 and not combined_output.strip())):
+                    target_container = f"ddev-{target}-{service}"
+                    docker_check = subprocess.run(["docker", "ps", "-a", "--filter", f"name=^{target_container}$", "--format", "{{.Names}}"], capture_output=True, text=True, timeout=5)
+                    if docker_check.stdout.strip() == target_container:
+                        dl_proc = subprocess.run(["docker", "logs", "--tail", str(tail), target_container], capture_output=True, text=True, timeout=10)
+                        proc.stdout = f"[Container '{target_container}' is stopped. Showing last recorded logs:]\n\n" + (dl_proc.stdout or dl_proc.stderr or "(No logs recorded)")
+                        proc.stderr = ""
+                    else:
+                        aux_check = subprocess.run(["docker", "ps", "--filter", f"name=ddev-{target}", "--format", "{{.Names}}"], capture_output=True, text=True, timeout=5)
+                        running_aux = [c.strip() for c in aux_check.stdout.strip().split("\n") if c.strip()]
+                        if running_aux:
+                            aux_name = running_aux[0]
+                            dl_proc = subprocess.run(["docker", "logs", "--tail", str(tail), aux_name], capture_output=True, text=True, timeout=10)
+                            proc.stdout = f"[Service '{service}' is not running for project '{target}'.]\n[Showing logs from active container '{aux_name}']:\n\n" + (dl_proc.stdout or dl_proc.stderr or "")
+                            proc.stderr = ""
+                        else:
+                            proc.stdout = f"Project '{target}' is currently stopped (no active '{service}' container found).\n\nTo view live container logs, click 'Start' or 'Start Everything' on the '{target}' project card."
+                            proc.stderr = ""
                 
                 post_free = shutil.disk_usage("/").free
                 post_colima_allocated = 0
@@ -687,7 +892,52 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
 
         self.send_error(404, "Endpoint not found")
 
+def ensure_traefik_orbit_config():
+    """
+    Ensures orbit.ddev.site is routed via DDEV's Traefik reverse proxy to port 7890.
+    """
+    try:
+        custom_dir = os.path.expanduser("~/.ddev/traefik/custom-global-config")
+        os.makedirs(custom_dir, exist_ok=True)
+        orbit_cfg = os.path.join(custom_dir, "orbit.yaml")
+        cfg_content = """http:
+  routers:
+    orbit-http:
+      entrypoints:
+        - http-80
+      rule: Host(`orbit.ddev.site`)
+      service: orbit-service
+      tls: false
+    orbit-https:
+      entrypoints:
+        - http-443
+      rule: Host(`orbit.ddev.site`)
+      service: orbit-service
+      tls: true
+
+  services:
+    orbit-service:
+      loadbalancer:
+        servers:
+          - url: http://host.docker.internal:7890
+
+tls:
+  certificates:
+    - certFile: /mnt/ddev-global-cache/traefik/certs/default_cert.crt
+      keyFile: /mnt/ddev-global-cache/traefik/certs/default_key.key
+"""
+        with open(orbit_cfg, "w") as f:
+            f.write(cfg_content)
+
+        subprocess.run(
+            ["docker", "cp", orbit_cfg, "ddev-router:/mnt/ddev-global-cache/traefik/config/orbit.yaml"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2
+        )
+    except Exception:
+        pass
+
 def start_server(port=PORT, auto_open=False):
+    ensure_traefik_orbit_config()
     Thread(target=update_scan_cache, args=(False,), daemon=True).start()
     
     for p in range(port, port + 10):
@@ -695,12 +945,13 @@ def start_server(port=PORT, auto_open=False):
             httpd = ThreadingHTTPServer(("127.0.0.1", p), OrbitHTTPHandler)
             url = f"http://localhost:{p}"
             print(f"\n========================================================", flush=True)
-            print(f"🚀 DDev & Disk Orbit is running at:", flush=True)
-            print(f"👉 {url}", flush=True)
+            print(f"🚀 DDev & Disk Orbit is running!", flush=True)
+            print(f"👉 Dedicated Local Address: https://orbit.ddev.site", flush=True)
+            print(f"👉 Direct Localhost:        {url}", flush=True)
             print(f"========================================================\n", flush=True)
             if auto_open:
                 try:
-                    subprocess.Popen(["open", url])
+                    subprocess.Popen(["open", "https://orbit.ddev.site"])
                 except Exception:
                     pass
             httpd.serve_forever()

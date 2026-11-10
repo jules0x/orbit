@@ -9,6 +9,8 @@ import sys
 import json
 import time
 import shutil
+import glob
+import re
 import subprocess
 from pathlib import Path
 from datetime import datetime
@@ -389,6 +391,224 @@ def get_git_info(approot):
     except Exception:
         return info
 
+def get_project_branding(approot, name):
+    """
+    Detects project logo/icon and brand theme color.
+    Searches themes/<theme>/static/svg, images, public/theme-*/src/svg, public/favicon.*, etc.
+    Extracts brand/primary color from variables.scss / _variables.scss if present.
+    Falls back to a handsome deterministic color from a balanced palette.
+    """
+    PALETTE = [
+        "#0a84ff", "#10b981", "#f59e0b", "#8b5cf6", 
+        "#ec4899", "#06b6d4", "#14b8a6", "#f97316", 
+        "#6366f1", "#3b82f6", "#d946ef", "#84cc16"
+    ]
+    deterministic_color = PALETTE[abs(hash(name)) % len(PALETTE)]
+    
+    branding = {
+        "has_logo": False,
+        "logo_path": None,
+        "brand_color": deterministic_color,
+        "has_theme_color": False,
+        "monogram": name[:3].upper() if len(name) >= 3 else name.upper()
+    }
+
+    if not approot or not os.path.isdir(approot):
+        return branding
+
+    logo_path = None
+    brand_color = None
+
+    # 1. Search themes directory
+    themes_dir = os.path.join(approot, "themes")
+    if os.path.isdir(themes_dir):
+        try:
+            for t in os.listdir(themes_dir):
+                tdir = os.path.join(themes_dir, t)
+                if not os.path.isdir(tdir):
+                    continue
+
+                # Check for SCSS variables for brand color
+                if not brand_color:
+                    for root, dirs, files in os.walk(tdir):
+                        dirs[:] = [d for d in dirs if d not in ("node_modules", "dist", ".git", "silverstripe-cache")]
+                        if len(os.path.relpath(root, tdir).split(os.sep)) > 3:
+                            continue
+                        for f in files:
+                            fl = f.lower()
+                            if fl.endswith(".scss") and any(k in fl for k in ("var", "color", "theme", "brand")):
+                                try:
+                                    with open(os.path.join(root, f), "r", errors="ignore") as fp:
+                                        content = fp.read(4000)
+                                        m = re.search(r"(?:primary|brand|theme|main|accent)[\w-]*\s*:\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))", content, re.I)
+                                        if m:
+                                            c_val = m.group(1).strip()
+                                            if c_val.startswith("#") and len(c_val) in (4, 7):
+                                                brand_color = c_val
+                                                break
+                                except Exception:
+                                    pass
+                        if brand_color:
+                            break
+
+                # Check for logo image (SVG prioritized, then PNG, ICO, WEBP)
+                svg_candidates = []
+                img_candidates = []
+                for sub in ["static/svg", "static/images", "static/img", "images", "img", "src/svg", "src/img", "src/images", "assets/images"]:
+                    sdir = os.path.join(tdir, sub)
+                    if os.path.isdir(sdir):
+                        try:
+                            for f in os.listdir(sdir):
+                                fl = f.lower()
+                                fp = os.path.join(sdir, f)
+                                if fl.endswith(".svg") and any(k in fl for k in ("logo", "brand", "mark")):
+                                    svg_candidates.append(fp)
+                                elif fl.endswith((".png", ".ico", ".webp", ".jpg")) and any(k in fl for k in ("logo", "brand", "favicon", "icon")):
+                                    img_candidates.append(fp)
+                        except Exception:
+                            pass
+                if svg_candidates:
+                    logo_path = svg_candidates[0]
+                    break
+                elif img_candidates and not logo_path:
+                    logo_path = img_candidates[0]
+        except Exception:
+            pass
+
+    # 2. Check public directory
+    if not logo_path:
+        public_dir = os.path.join(approot, "public")
+        if os.path.isdir(public_dir):
+            for pat in [
+                "theme-*/src/svg/*logo*.svg",
+                "favicon.png",
+                "favicon.ico",
+                "apple-touch-icon.png",
+                "assets/**/logo*.png"
+            ]:
+                matches = glob.glob(os.path.join(public_dir, pat), recursive=True)
+                if matches:
+                    logo_path = matches[0]
+                    break
+
+    # 3. Check root favicon.ico
+    if not logo_path:
+        root_fav = os.path.join(approot, "favicon.ico")
+        if os.path.isfile(root_fav):
+            logo_path = root_fav
+
+    if logo_path and os.path.isfile(logo_path):
+        branding["has_logo"] = True
+        branding["logo_path"] = logo_path
+
+    if brand_color:
+        branding["has_theme_color"] = True
+        branding["brand_color"] = brand_color
+
+    return branding
+
+def extract_project_urls(ddev_dir, default_name):
+    """
+    Parses additional_fqdns and additional_hostnames from .ddev/config.yaml
+    and any config.*.yaml files.
+    Prefers 'local.*' style agency domains (e.g. local.tradingstandards.govt.nz),
+    falling back to first additional_fqdn, additional_hostname, or <name>.ddev.site.
+    """
+    fqdns = []
+    hostnames = []
+    cfg_files = [os.path.join(ddev_dir, "config.yaml")]
+    try:
+        for f in os.listdir(ddev_dir):
+            if f.startswith("config.") and f.endswith(".yaml"):
+                cfg_files.append(os.path.join(ddev_dir, f))
+    except Exception:
+        pass
+
+    for cf in cfg_files:
+        if not os.path.isfile(cf):
+            continue
+        try:
+            with open(cf, "r", errors="ignore") as f:
+                in_fqdns = False
+                in_hostnames = False
+                for line in f:
+                    stripped = line.strip()
+                    if not stripped or stripped.startswith("#"):
+                        continue
+                    if stripped.startswith("additional_fqdns:"):
+                        in_fqdns = True
+                        in_hostnames = False
+                        val = stripped.split("additional_fqdns:", 1)[1].strip()
+                        if val.startswith("[") and val.endswith("]"):
+                            items = [x.strip().strip("'\"") for x in val[1:-1].split(",") if x.strip()]
+                            for it in items:
+                                if it not in fqdns:
+                                    fqdns.append(it)
+                        continue
+                    elif stripped.startswith("additional_hostnames:"):
+                        in_hostnames = True
+                        in_fqdns = False
+                        val = stripped.split("additional_hostnames:", 1)[1].strip()
+                        if val.startswith("[") and val.endswith("]"):
+                            items = [x.strip().strip("'\"") for x in val[1:-1].split(",") if x.strip()]
+                            for it in items:
+                                if it not in hostnames:
+                                    hostnames.append(it)
+                        continue
+                    elif line[0] not in (" ", "\t") and ":" in line:
+                        in_fqdns = False
+                        in_hostnames = False
+
+                    if in_fqdns and stripped.startswith("-"):
+                        val = stripped.lstrip("-").strip().strip("'\"")
+                        if val and val not in fqdns:
+                            fqdns.append(val)
+                    elif in_hostnames and stripped.startswith("-"):
+                        val = stripped.lstrip("-").strip().strip("'\"")
+                        if val and val not in hostnames:
+                            hostnames.append(val)
+        except Exception:
+            pass
+
+    primary_domain = None
+    # 1. Prefer local.* style domains (e.g. local.tradingstandards.govt.nz)
+    for d in fqdns:
+        if d.startswith("local."):
+            primary_domain = d
+            break
+    # 2. Next prefer any other custom FQDN (e.g. tradingstandards.test)
+    if not primary_domain and fqdns:
+        primary_domain = fqdns[0]
+    # 3. Next prefer additional_hostname
+    elif not primary_domain and hostnames:
+        primary_domain = f"{hostnames[0]}.ddev.site"
+
+    default_domain = f"{default_name}.ddev.site"
+    if not primary_domain:
+        primary_domain = default_domain
+
+    primary_url = f"https://{primary_domain}"
+
+    all_domains = []
+    if primary_domain:
+        all_domains.append(primary_domain)
+    for d in fqdns:
+        if d not in all_domains:
+            all_domains.append(d)
+    for h in hostnames:
+        hd = f"{h}.ddev.site"
+        if hd not in all_domains:
+            all_domains.append(hd)
+    if default_domain not in all_domains:
+        all_domains.append(default_domain)
+
+    return {
+        "primary_url": primary_url,
+        "primary_domain": primary_domain,
+        "all_urls": [f"https://{d}" for d in all_domains],
+        "all_domains": all_domains
+    }
+
 def get_ddev_projects():
     projects = {}
     proj_list_file = os.path.join(DDEV_DIR, "project_list.yaml")
@@ -469,6 +689,13 @@ def get_ddev_projects():
                 except Exception:
                     pass
 
+            # Extract preferred agency domain / additional FQDNs
+            urls_info = extract_project_urls(ddev_dir, name)
+            p["http_url"] = urls_info["primary_url"]
+            p["primary_domain"] = urls_info["primary_domain"]
+            p["all_urls"] = urls_info["all_urls"]
+            p["all_domains"] = urls_info["all_domains"]
+
             # Search compose files
             try:
                 for f in os.listdir(ddev_dir):
@@ -507,22 +734,24 @@ def get_ddev_projects():
                 except Exception:
                     pass
 
-    # Inspect git status & dist concurrently across all projects
+    # Inspect git status, dist, and branding concurrently across all projects
     def inspect_project_git_and_dist(item):
         pname, pdata = item
         approot = pdata.get("approot")
         dist = detect_project_dist(approot) if approot else {"configured": False, "status": "none", "is_built": False}
         git_info = get_git_info(approot) if approot else None
-        return pname, dist, git_info
+        branding = get_project_branding(approot, pname)
+        return pname, dist, git_info, branding
 
     try:
         with ThreadPoolExecutor(max_workers=10) as ex:
             results = list(ex.map(inspect_project_git_and_dist, projects.items()))
-        for pname, dist, git_info in results:
+        for pname, dist, git_info, branding in results:
             if pname in projects:
                 projects[pname]["dist"] = dist
                 projects[pname]["git"] = git_info
                 projects[pname]["branch"] = git_info.get("branch") if git_info else None
+                projects[pname]["branding"] = branding
     except Exception:
         # Fallback to serial inspection if ThreadPool fails
         for pname, p in projects.items():
@@ -530,6 +759,7 @@ def get_ddev_projects():
             p["dist"] = detect_project_dist(approot)
             p["git"] = get_git_info(approot)
             p["branch"] = p["git"].get("branch") if p["git"] else get_git_branch(approot)
+            p["branding"] = get_project_branding(approot, pname)
 
     return projects
 
@@ -538,16 +768,28 @@ def get_docker_data(known_projects):
     images = []
     running_containers = set()
 
+    containers_detail = []
     # Check running containers
     try:
         proc = subprocess.run(
-            ["docker", "ps", "--format", "{{.Names}}"],
+            ["docker", "ps", "--format", "{{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.Image}}"],
             capture_output=True, text=True, timeout=5
         )
         if proc.returncode == 0:
             for line in proc.stdout.strip().split("\n"):
                 if line:
-                    running_containers.add(line.strip())
+                    parts = line.split("\t")
+                    c_name = parts[0].strip()
+                    c_status = parts[1].strip() if len(parts) > 1 else "Up"
+                    c_ports = parts[2].strip() if len(parts) > 2 else ""
+                    c_image = parts[3].strip() if len(parts) > 3 else ""
+                    running_containers.add(c_name)
+                    containers_detail.append({
+                        "name": c_name,
+                        "status": c_status,
+                        "ports": c_ports,
+                        "image": c_image
+                    })
     except Exception:
         pass
 
@@ -631,6 +873,7 @@ def get_docker_data(known_projects):
 
     return {
         "running_containers": list(running_containers),
+        "containers_detail": containers_detail,
         "volumes": volumes,
         "images": images,
         "total_volumes": len(volumes),
@@ -887,13 +1130,14 @@ def full_audit():
     # Enrich projects with live container status, volumes, and dumps
     running_set = set(docker_data.get("running_containers", []))
     for name, p in projects.items():
-        is_running = any(c == f"ddev-{name}-web" or c == f"ddev-{name}-db" or (c.startswith(f"ddev-{name}-") and "-router" not in c and "-ssh" not in c) for c in running_set)
+        # A DDEV project is only active/running if its primary web container is running
+        is_web_running = (f"ddev-{name}-web" in running_set)
         search_is_running = any(
             (c == f"ddev-{name}-solr" or c == f"ddev-{name}-elasticsearch" or c == f"ddev-{name}-es" or c == f"ddev-{name}-opensearch" or f"{name}-solr" in c or f"{name}-elasticsearch" in c)
             for c in running_set
         )
-        p["is_running"] = is_running
-        p["status"] = "running" if is_running else "stopped"
+        p["is_running"] = is_web_running
+        p["status"] = "running" if is_web_running else "stopped"
         if p.get("search", {}).get("configured"):
             p["search"]["is_running"] = search_is_running
 

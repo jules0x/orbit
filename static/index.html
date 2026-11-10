@@ -3,12 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DDev Orbit — Space Optimizer</title>
+  <title>Orbit — Local DDEV & Storage</title>
   
-  <!-- Desk Design System Typography: Space Grotesk + Space Mono + Archivo Black -->
+  <!-- Favicon: Vector SVG for modern browsers + ICO fallback + Apple Touch Icon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#0a84ff">
+  
+  <!-- PWA Web App Manifest & iOS Web App Meta -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Orbit">
+  
+  <!-- Modern Clean Typography: Inter for UI + JetBrains Mono for Technical Data -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -17,29 +30,27 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
-            mono: ['Space Mono', 'ui-monospace', 'monospace'],
-            display: ['Archivo Black', 'Space Grotesk', 'sans-serif'],
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'Menlo', 'monospace'],
           },
           colors: {
-            deskBg: '#0e0c1a',
-            deskBg2: '#0a0914',
-            deskSurface: '#171429',
-            deskSurface2: '#1f1b36',
-            deskSurface3: '#272244',
-            deskText: '#eeebff',
-            deskMuted: '#b3aed0',
-            deskFaint: '#7d78a0',
-            deskAccent: '#8f86ff',
-            deskReview: '#df7cf0',
-            deskBad: '#ff6f8a',
-            deskBadBg: '#3a1424',
-            deskWarn: '#ffb547',
-            deskWarnBg: '#36260b',
-            deskOk: '#4ade9c',
-            deskOkBg: '#0e2a1f',
-            deskStale: '#3fd5c9',
-            deskStaleBg: '#0d2e2d',
+            orbitBg: '#090a0f',
+            orbitSurface: '#12141c',
+            orbitSurface2: '#191c28',
+            orbitSurface3: '#222636',
+            orbitBorder: 'rgba(255, 255, 255, 0.08)',
+            orbitBorderHover: 'rgba(255, 255, 255, 0.16)',
+            orbitText: '#f3f4f8',
+            orbitMuted: '#9aa0b4',
+            orbitFaint: '#636980',
+            orbitAccent: '#6366f1',
+            orbitAccentHover: '#4f46e5',
+            orbitOk: '#10b981',
+            orbitOkBg: 'rgba(16, 185, 129, 0.12)',
+            orbitWarn: '#f59e0b',
+            orbitWarnBg: 'rgba(245, 158, 11, 0.12)',
+            orbitBad: '#f43f5e',
+            orbitBadBg: 'rgba(244, 63, 94, 0.14)',
           }
         }
       }
@@ -47,96 +58,271 @@
   </script>
   <style>
     :root {
-      --r: 6px;
-      --bg: #0e0c1a;
-      --bg-2: #0a0914;
-      --surface: #171429;
-      --surface-2: #1f1b36;
-      --surface-3: #272244;
-      --line: rgb(220 215 255 / .08);
-      --edge: rgb(220 215 255 / .12);
-      --text: #eeebff;
-      --muted: #b3aed0;
-      --faint: #7d78a0;
-      --accent: #8f86ff;
-      --review: #df7cf0;
-      --bad: #ff6f8a;
-      --bad-bg: #3a1424;
-      --warn: #ffb547;
-      --warn-bg: #36260b;
-      --ok: #4ade9c;
-      --ok-bg: #0e2a1f;
-      --stale: #3fd5c9;
-      --stale-bg: #0d2e2d;
-      --g-accent: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
-      --g-review: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-      --g-bad: linear-gradient(135deg, #f43f5e 0%, #fb7a3c 100%);
-      --g-warn: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-      --g-ok: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-      --g-cyan: linear-gradient(135deg, #0d9488 0%, #22c1c3 100%);
-      --shadow: 0 1px 2px rgb(0 0 0 / .4), 0 10px 28px -8px rgb(0 0 0 / .5);
-      --shadow-lg: 0 2px 4px rgb(0 0 0 / .4), 0 22px 50px -12px rgb(0 0 0 / .7);
-      --sans: 'Space Grotesk', system-ui, sans-serif;
-      --mono: 'Space Mono', ui-monospace, monospace;
-      --display: 'Archivo Black', 'Space Grotesk', sans-serif;
+      --r: 10px;
+      --bg: #121316;
+      --bg-2: #18191e;
+      --surface: rgba(24, 26, 34, 0.88);
+      --surface-2: #20222c;
+      --surface-3: #2a2d3b;
+      --line: rgba(255, 255, 255, 0.08);
+      --edge: rgba(255, 255, 255, 0.14);
+      --text: #f5f5f7;
+      --muted: #9da3b4;
+      --faint: #656b7c;
+      --accent: #0a84ff;
+      --accent-hover: #0071e3;
+      --bad: #ff453a;
+      --bad-bg: rgba(255, 69, 58, 0.16);
+      --warn: #ff9f0a;
+      --warn-bg: rgba(255, 159, 10, 0.16);
+      --ok: #30d158;
+      --ok-bg: rgba(48, 209, 88, 0.16);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.65);
     }
-    
+
     * { box-sizing: border-box; }
-    
+
     body {
       margin: 0;
-      background:
-        radial-gradient(1200px 600px at 0% 0%, rgb(99 102 241 / .12), transparent 60%),
-        radial-gradient(900px 600px at 100% 10%, rgb(236 72 153 / .09), transparent 60%),
-        radial-gradient(900px 700px at 50% 100%, rgb(20 184 166 / .08), transparent 60%),
-        var(--bg);
+      background-color: var(--bg);
+      background-image: radial-gradient(1000px 500px at 50% 0%, rgba(10, 132, 255, 0.08), transparent 70%);
       background-attachment: fixed;
       color: var(--text);
-      font-family: var(--sans);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", 'Inter', system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Desk Fluid Gutter Layout - Eliminates Dead Margin Space */
     main {
-      padding: 24px clamp(20px, 3vw, 56px) 64px;
+      padding: 24px clamp(16px, 3vw, 48px) 64px;
       width: 100%;
-      max-width: 1720px;
+      max-width: 1600px;
       margin: 0 auto;
     }
 
     /* Scrollbars */
-    ::-webkit-scrollbar {
-      width: 7px;
-      height: 7px;
-    }
-    ::-webkit-scrollbar-track {
-      background: var(--bg-2);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--edge);
-      border-radius: var(--r);
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--muted);
-    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-2); }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
 
-    /* Studio Card */
-    .desk-card {
+    /* macOS Frosted Glass Studio Cards */
+    .orbit-card {
       background: var(--surface);
-      border: 1px solid var(--line);
+      backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--edge);
       box-shadow: var(--shadow);
       border-radius: var(--r);
     }
-    .desk-card-2 {
+    .orbit-card-2 {
       background: var(--surface-2);
       border: 1px solid var(--edge);
       border-radius: var(--r);
     }
 
+    /* ============================================================== */
+    /* TACTILE BRUTALIST BUTTONS (Integrated with Mac Studio)          */
+    /* Chunky 2px black border, solid 3px black offset shadow,         */
+    /* satisfying physical click-down interaction                     */
+    /* ============================================================== */
+    button:not(.btn-ghost),
+    .tab-btn,
+    .btn-tactile {
+      border: 2px solid #000000 !important;
+      box-shadow: 3px 3px 0px #000000 !important;
+      border-radius: 8px !important;
+      font-weight: 700 !important;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease !important;
+    }
+
+    button:not(.btn-ghost):hover,
+    .tab-btn:hover,
+    .btn-tactile:hover {
+      transform: translate(-1.5px, -1.5px);
+      box-shadow: 4.5px 4.5px 0px #000000 !important;
+    }
+
+    button:not(.btn-ghost):active,
+    .tab-btn:active,
+    .btn-tactile:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #000000 !important;
+    }
+
+    /* ============================================================== */
+    /* DYNAMIC AMBIENT PAGE BACKGROUND (Aligned to Active Section)     */
+    /* ============================================================== */
+    body {
+      margin: 0;
+      transition: background-color 0.4s ease, background-image 0.4s ease;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Tab 1: Projects & Cockpit (Electric Blue Ambient Aura) */
+    body,
+    body[data-tab="ddev"] {
+      background-color: #0b111e !important;
+      background-image: radial-gradient(1400px 750px at 50% -60px, rgba(14, 136, 255, 0.35), transparent 75%) !important;
+    }
+
+    /* Tab 2: Storage & Database Dumps (Emerald Mint Ambient Aura) */
+    body[data-tab="storage"],
+    body[data-tab="dumps"],
+    body[data-tab="optimizer"] {
+      background-color: #081611 !important;
+      background-image: radial-gradient(1400px 750px at 50% -60px, rgba(16, 185, 129, 0.35), transparent 75%) !important;
+    }
+
+    /* Tab 3: Docker & Colima Engine (Rocket Amber Orange Ambient Aura) */
+    body[data-tab="docker"] {
+      background-color: #1a1208 !important;
+      background-image: radial-gradient(1400px 750px at 50% -60px, rgba(245, 158, 11, 0.35), transparent 75%) !important;
+    }
+
+    /* ============================================================== */
+    /* UNIQUE SEMI-TRANSPARENT SECTION BUTTONS (Brutalist Tactile)    */
+    /* Inactive: Unique dim/dark semi-transparent tint                */
+    /* Active: Solid vibrant color replacing blue                     */
+    /* ============================================================== */
+
+    /* Tab 1: Projects & Cockpit (Electric Sky Blue - High Contrast Black on Blue!) */
+    #tabBtn-ddev {
+      background-color: rgba(56, 189, 248, 0.16) !important;
+      color: #7dd3fc !important;
+    }
+    #tabBtn-ddev:hover {
+      background-color: rgba(56, 189, 248, 0.28) !important;
+      color: #bae6fd !important;
+    }
+    #tabBtn-ddev.tab-active {
+      background-color: #38bdf8 !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+      box-shadow: 3.5px 3.5px 0px #000000 !important;
+    }
+    #tabBtn-ddev.tab-active svg {
+      color: #000000 !important;
+      stroke: #000000 !important;
+    }
+    #tabBtn-ddev:not(.tab-active) #tabCount-ddev {
+      background-color: rgba(56, 189, 248, 0.22) !important;
+      color: #bae6fd !important;
+      border: 1px solid rgba(56, 189, 248, 0.45) !important;
+    }
+    #tabBtn-ddev.tab-active #tabCount-ddev {
+      background-color: rgba(0, 0, 0, 0.85) !important;
+      color: #bae6fd !important;
+      border: 1px solid rgba(0, 0, 0, 0.9) !important;
+    }
+
+    /* Tab 2: Storage & Database Dumps (Emerald Mint - High Contrast Black on Mint!) */
+    #tabBtn-storage {
+      background-color: rgba(52, 211, 153, 0.16) !important;
+      color: #6ee7b7 !important;
+    }
+    #tabBtn-storage:hover {
+      background-color: rgba(52, 211, 153, 0.28) !important;
+      color: #a7f3d0 !important;
+    }
+    #tabBtn-storage.tab-active {
+      background-color: #34d399 !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+      box-shadow: 3.5px 3.5px 0px #000000 !important;
+    }
+    #tabBtn-storage.tab-active svg {
+      color: #000000 !important;
+      stroke: #000000 !important;
+    }
+    #tabBtn-storage:not(.tab-active) #tabCount-storage {
+      background-color: rgba(52, 211, 153, 0.22) !important;
+      color: #a7f3d0 !important;
+      border: 1px solid rgba(52, 211, 153, 0.45) !important;
+    }
+    #tabBtn-storage.tab-active #tabCount-storage {
+      background-color: rgba(0, 0, 0, 0.85) !important;
+      color: #a7f3d0 !important;
+      border: 1px solid rgba(0, 0, 0, 0.9) !important;
+    }
+
+    /* Tab 3: Docker & Colima Engine (Rocket Amber Orange - High Contrast Black on Amber!) */
+    #tabBtn-docker {
+      background-color: rgba(245, 158, 11, 0.16) !important;
+      color: #fde047 !important;
+    }
+    #tabBtn-docker:hover {
+      background-color: rgba(245, 158, 11, 0.28) !important;
+      color: #fef08a !important;
+    }
+    #tabBtn-docker.tab-active {
+      background-color: #f59e0b !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+      box-shadow: 3.5px 3.5px 0px #000000 !important;
+    }
+    #tabBtn-docker.tab-active svg {
+      color: #000000 !important;
+      stroke: #000000 !important;
+    }
+    #tabBtn-docker:not(.tab-active) #tabCount-docker {
+      background-color: rgba(245, 158, 11, 0.28) !important;
+      color: #fef08a !important;
+      border: 1px solid rgba(245, 158, 11, 0.45) !important;
+    }
+    #tabBtn-docker.tab-active #tabCount-docker {
+      background-color: rgba(0, 0, 0, 0.85) !important;
+      color: #fef08a !important;
+      border: 1px solid rgba(0, 0, 0, 0.9) !important;
+    }
+
+    /* Main Tab Navigation Buttons (Comfortable inline padding and spacing) */
+    .tab-btn {
+      padding: 0.65rem 1.4rem !important; /* 10px vertical, 22.4px inline */
+      gap: 0.75rem !important;
+    }
+
+    /* Active Tab Inner Count Badges (Unified tactile black pills) */
+    .tab-btn.tab-active span[id^="tabCount-"] {
+      background-color: rgba(0, 0, 0, 0.85) !important;
+      border: 1px solid rgba(0, 0, 0, 0.9) !important;
+      font-weight: 800 !important;
+    }
+
+    /* Small ghost / icon button overrides (e.g. close modals, copy icons) */
+    .btn-ghost {
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent;
+      transition: color 0.15s ease;
+    }
+    .btn-ghost:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
     /* Selection Row styling */
     .row-selected {
-      background-color: color-mix(in srgb, var(--accent) 14%, var(--surface)) !important;
+      background-color: rgba(10, 132, 255, 0.16) !important;
       border-left: 3px solid var(--accent) !important;
+    }
+
+    /* Tactile App Drawer Tiles (macOS Launchpad / App Grid style) */
+    .app-drawer-tile {
+      background-color: var(--surface-2);
+      border: 2px solid #000000 !important;
+      box-shadow: 3.5px 3.5px 0px #000000 !important;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .app-drawer-tile:hover {
+      box-shadow: 5px 5px 0px #000000 !important;
+      transform: translateY(-2px);
+      background-color: var(--surface-3);
+    }
+    .app-drawer-tile:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #000000 !important;
     }
 
     /* Checkbox */
@@ -158,210 +344,333 @@
     }
   </style>
 </head>
-<body class="min-h-screen font-sans selection:bg-indigo-600 selection:text-white">
+<body class="min-h-screen selection:bg-indigo-600 selection:text-white">
 
   <!-- Main Fluid Layout -->
   <main>
 
-    <!-- Top Navigation / Brand Header -->
-    <header class="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-[var(--line)] gap-4">
+    <!-- Top Navigation / Brand & Status Header -->
+    <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between pb-6 border-b border-[var(--line)] gap-5">
+      
+      <!-- Brand & Title -->
       <div class="flex items-center gap-3.5">
-        <div class="w-11 h-11 rounded-[var(--r)] flex items-center justify-center font-display text-white text-lg shadow-lg shrink-0" style="background: var(--g-accent); box-shadow: 0 6px 16px -4px rgb(91 76 240 / .5);">
-          O
+        <div class="w-12 h-12 rounded-[var(--r)] flex items-center justify-center shrink-0 shadow-xl overflow-hidden border border-indigo-500/30 bg-[#070a14]">
+          <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="headerTileBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#070a14"/>
+                <stop offset="60%" stop-color="#0f172a"/>
+                <stop offset="100%" stop-color="#1e1b4b"/>
+              </linearGradient>
+              <linearGradient id="headerOrbit1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="50%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#c084fc"/>
+              </linearGradient>
+              <linearGradient id="headerOrbit2" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#34d399"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+              <radialGradient id="headerPlanet" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#93c5fd"/>
+                <stop offset="45%" stop-color="#3b82f6"/>
+                <stop offset="100%" stop-color="#1e3a8a"/>
+              </radialGradient>
+              <filter id="headerGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#38bdf8" flood-opacity="0.5"/>
+              </filter>
+            </defs>
+            <rect width="48" height="48" rx="12" fill="url(#headerTileBg)"/>
+            <!-- Outer Orbital Ring (-32 deg) -->
+            <ellipse cx="24" cy="24" rx="17.5" ry="6.2" transform="rotate(-32 24 24)" fill="none" stroke="url(#headerOrbit1)" stroke-width="2" stroke-dasharray="24 6 12 4" stroke-linecap="round" opacity="0.95"/>
+            <!-- Counter Orbital Ring (+42 deg) -->
+            <ellipse cx="24" cy="24" rx="13.5" ry="5.2" transform="rotate(42 24 24)" fill="none" stroke="url(#headerOrbit2)" stroke-width="1.6" stroke-dasharray="16 5" stroke-linecap="round" opacity="0.85"/>
+            <!-- Central Planet Core -->
+            <circle cx="24" cy="24" r="6" fill="url(#headerPlanet)" filter="url(#headerGlow)"/>
+            <circle cx="22" cy="22" r="4.2" fill="#bfdbfe" opacity="0.45"/>
+            <!-- Orbiting Satellites -->
+            <circle cx="36" cy="15" r="2.2" fill="#38bdf8" filter="url(#headerGlow)"/>
+            <circle cx="13" cy="33" r="1.8" fill="#34d399" filter="url(#headerGlow)"/>
+            <circle cx="32" cy="33" r="1.3" fill="#c084fc"/>
+          </svg>
         </div>
         <div>
-          <div class="flex items-center gap-2.5">
-            <h1 class="text-xl font-display tracking-tight text-[var(--text)]">DDev Orbit</h1>
-            <span class="text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono font-bold uppercase tracking-wider bg-[var(--surface-2)] text-[var(--accent)] border border-[var(--edge)]">Disk Optimizer</span>
-            <span id="headerStatusBadge" class="text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono text-[var(--muted)] bg-[var(--bg-2)] border border-[var(--line)] hidden sm:inline-block">Ready</span>
+          <div class="flex items-center gap-3">
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Orbit</h1>
+            <a href="https://orbit.ddev.site" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-950/40 hover:bg-emerald-900/50 px-2.5 py-1 rounded-full border border-emerald-800/40 transition shadow-sm" title="Dedicated local domain via Traefik (Click to open)">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="font-bold">orbit.ddev.site</span>
+              <svg class="w-3 h-3 text-emerald-400/80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+            <span id="headerStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono text-[var(--muted)] bg-[var(--surface-2)] border border-[var(--line)] hidden sm:inline-block">Ready</span>
           </div>
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2.5 flex-wrap">
-        <!-- Colima Resource Pill -->
-        <div id="colimaQuickBar" class="flex items-center gap-2 px-3 py-1.5 rounded-[var(--r)] desk-card-2 border border-[var(--edge)] flex-wrap sm:flex-nowrap">
-          <span id="colimaStatusDot" class="w-2.5 h-2.5 rounded-full bg-[var(--faint)] shrink-0"></span>
-          <span id="colimaStatusText" class="text-xs font-mono font-bold text-[var(--muted)]">Colima</span>
-          <span class="text-[var(--edge)]">|</span>
-          <span id="colimaMemPill" class="text-xs font-mono text-[var(--text)]" title="Memory (RAM): Current Used / Setting Limit">RAM: --</span>
-          <span class="text-[var(--edge)]">•</span>
-          <span id="colimaCpuPill" class="text-xs font-mono text-[var(--text)]" title="CPU: Current Load / Setting Cores">CPU: --</span>
-          <span class="text-[var(--edge)]">•</span>
-          <span id="colimaDiskPill" class="text-xs font-mono text-[var(--text)]" title="Datadisk: Current Allocated / Setting Limit">Disk: --</span>
-          <button id="colimaQuickRestartBtn" onclick="triggerColimaRestart(this)" class="p-1 rounded hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-white transition" title="Restart Colima VM">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
-          <button onclick="openColimaSettingsModal()" class="ml-0.5 p-1 rounded hover:bg-[var(--surface-3)] text-[var(--accent)] hover:text-white transition" title="Colima CPU, RAM & Disk Settings">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
+      <!-- Live Vitals Cluster: Mac Storage Tile & Colima Engine Tile (Stacked Studio Widgets) -->
+      <div class="flex items-stretch gap-3 flex-wrap">
+        
+        <!-- Mac Storage Tile -->
+        <div id="macQuickPill" class="orbit-card p-3 rounded-[var(--r)] flex flex-col justify-between text-xs border border-[var(--edge)] shadow-md min-w-[190px]">
+          <div class="flex items-center justify-between gap-2 pb-1.5 border-b border-[var(--line)]">
+            <div class="flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span class="font-bold text-white text-xs tracking-tight">Mac Storage</span>
+            </div>
+            <span id="diskAlertBadgeHeader" class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-emerald-950/70 text-emerald-400 border border-emerald-800/40">Healthy</span>
+          </div>
+          <div class="grid grid-cols-1 gap-1 pt-1.5 text-[11px] font-mono">
+            <div class="flex items-center justify-between text-zinc-300">
+              <span class="text-[9px] uppercase font-bold text-[var(--muted)]">Free</span>
+              <span id="diskFreeHeaderStr" class="font-semibold text-white">-- GB Free</span>
+            </div>
+            <div class="flex items-center justify-between text-zinc-300">
+              <span class="text-[9px] uppercase font-bold text-[var(--muted)]">Disk Type</span>
+              <span class="font-semibold text-zinc-300">APFS SSD</span>
+            </div>
+            <div class="flex items-center justify-between text-zinc-300">
+              <span class="text-[9px] uppercase font-bold text-[var(--muted)]">System</span>
+              <span class="font-semibold text-[var(--faint)]">Macintosh HD</span>
+            </div>
+          </div>
         </div>
 
-        <button id="refreshBtn" onclick="triggerRefresh()" class="flex items-center gap-2 px-4 py-2.5 text-xs font-mono font-bold rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] border border-[var(--edge)] shadow transition active:scale-95">
+        <!-- Colima VM Engine Tile -->
+        <div id="colimaQuickBar" class="orbit-card p-3 rounded-[var(--r)] flex flex-col justify-between text-xs border border-[var(--edge)] shadow-md min-w-[240px]">
+          <div class="flex items-center justify-between gap-2 pb-1.5 border-b border-[var(--line)]">
+            <div class="flex items-center gap-1.5">
+              <span id="colimaStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <span id="colimaStatusText" class="font-bold text-white text-xs tracking-tight">Colima (Running)</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <button id="colimaQuickRestartBtn" onclick="triggerColimaRestart(this)" class="btn-ghost p-1 text-[var(--muted)] hover:text-white transition" title="Restart Colima VM">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+              <button onclick="openColimaSettingsModal()" class="btn-ghost p-1 text-indigo-400 hover:text-white transition" title="Colima CPU, RAM & Disk Settings">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 gap-1 pt-1.5 text-[11px] font-mono">
+            <div class="flex items-center justify-between text-zinc-300">
+              <span class="text-[9px] uppercase font-bold text-[var(--muted)]">RAM</span>
+              <span id="colimaMemPill" class="font-semibold text-white">--</span>
+            </div>
+            <div class="flex items-center justify-between text-zinc-300">
+              <span class="text-[9px] uppercase font-bold text-[var(--muted)]">CPU</span>
+              <span id="colimaCpuPill" class="font-semibold text-white">--</span>
+            </div>
+            <div class="flex items-center justify-between text-zinc-300">
+              <span class="text-[9px] uppercase font-bold text-[var(--muted)]">Datadisk</span>
+              <span id="colimaDiskPill" class="font-semibold text-white">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Refresh Button -->
+        <button id="refreshBtn" onclick="triggerRefresh(false)" class="flex flex-col items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-100 transition active:scale-95 shrink-0 self-stretch min-w-[75px]" title="Re-scan and audit system disks">
           <svg id="refreshSpinner" class="w-4 h-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          <span id="refreshBtnText">Refresh</span>
+          <span id="refreshBtnText" class="text-[11px]">Refresh</span>
+        </button>
+
+        <!-- PWA Install App Button (Auto-shows when browser detects installability) -->
+        <button id="pwaInstallBtn" onclick="triggerPwaInstall()" class="hidden flex-col items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-[var(--r)] bg-indigo-600 hover:bg-indigo-500 text-white transition active:scale-95 shrink-0 self-stretch min-w-[75px] border-2 border-black shadow-[3px_3px_0px_#000]" title="Install DDev Orbit as a dedicated Desktop App (PWA)">
+          <svg class="w-4 h-4 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span class="text-[11px]">Install App</span>
         </button>
       </div>
+
     </header>
 
-    <!-- Space Health Overview Hero (Full Fluid Span) -->
-    <section class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
-
-      <!-- Mac System Disk Meter (7 cols) -->
-      <div class="lg:col-span-7 desk-card p-6 flex flex-col justify-between relative">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2.5">
-            <svg class="w-5 h-5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            <h2 class="text-sm font-bold uppercase tracking-wider text-[var(--text)] font-sans">Mac System Storage (APFS)</h2>
-          </div>
-          <span id="diskAlertBadge" class="text-xs px-3 py-1 rounded-[var(--r)] font-mono font-bold" style="background: var(--bad-bg); color: var(--bad); border: 1px solid var(--bad);">Analyzing...</span>
-        </div>
-
-        <div>
-          <div class="flex items-baseline justify-between mb-2">
-            <div class="flex items-center flex-wrap gap-2">
-              <span id="diskFreeStr" class="text-4xl font-display text-[var(--text)] tracking-tight">-- GB</span>
-              <span class="text-sm font-bold text-[var(--muted)] font-mono ml-1 uppercase">Free</span>
-              <span id="diskGainBadge" class="hidden px-2.5 py-1 text-xs font-mono font-bold rounded-[var(--r)] shadow-sm animate-pulse flex items-center gap-1.5 transition-all duration-300" style="background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok);">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
-                <span id="diskGainBadgeText">+0 GB Saved</span>
-              </span>
-            </div>
-            <div class="text-right">
-              <span id="diskUsedStr" class="text-sm font-bold text-[var(--text)] font-mono">-- GB</span>
-              <span class="text-xs text-[var(--faint)] font-mono"> used of </span>
-              <span id="diskTotalStr" class="text-sm font-bold text-[var(--text)] font-mono">-- GB</span>
-            </div>
-          </div>
-
-          <!-- Progress Bar (Thicker) -->
-          <div class="w-full bg-[var(--bg-2)] rounded-[var(--r)] h-6 overflow-hidden p-1 border border-[var(--edge)]">
-            <div id="diskProgressBar" class="h-full rounded-[calc(var(--r)-2px)] transition-all duration-700" style="background: var(--g-bad); width: 50%;"></div>
-          </div>
-          <div class="flex justify-end mt-2 font-mono">
-            <span id="diskPercentText" class="text-sm sm:text-base font-display text-[var(--text)] tracking-tight">--% utilized</span>
-          </div>
-        </div>
-
-        <!-- Quick Sub-breakdown badges -->
-        <div class="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-[var(--line)] text-center">
-          <div class="desk-card-2 p-3">
-            <div class="text-[11px] text-[var(--muted)] font-mono uppercase tracking-wider">Colima VM Disk</div>
-            <div id="metricColimaDisk" class="text-base font-display text-[var(--accent)] mt-0.5">-- GB</div>
-          </div>
-          <div class="desk-card-2 p-3">
-            <div class="text-[11px] text-[var(--muted)] font-mono uppercase tracking-wider">DB Dumps Found</div>
-            <div id="metricDbDumps" class="text-base font-display text-[var(--warn)] mt-0.5">-- GB</div>
-          </div>
-          <div class="desk-card-2 p-3">
-            <div class="text-[11px] text-[var(--muted)] font-mono uppercase tracking-wider">DDEV Volumes</div>
-            <div id="metricDockerVolumes" class="text-base font-display text-[var(--ok)] mt-0.5">-- vols</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Optimization Potential Card (5 cols) -->
-      <div class="lg:col-span-5 desk-card p-6 flex flex-col justify-between relative border-l-4" style="border-left-color: var(--ok);">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-mono font-bold uppercase tracking-wider text-[var(--accent)]">Reclaimable Space</span>
-          <span class="text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono font-bold" style="background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok);">Safe To Recover</span>
-        </div>
-
-        <div class="my-4">
-          <div id="potentialSavingsStr" class="text-5xl font-display tracking-tight my-2" style="background: var(--g-ok); -webkit-background-clip: text; background-clip: text; color: transparent;">
-            -- GB
-          </div>
-        </div>
-
-        <!-- Safety Notice Badge -->
-        <div class="mb-4 p-2.5 rounded-[var(--r)] desk-card-2 flex items-center gap-2.5 text-xs text-[var(--ok)] font-mono">
-          <svg class="w-4 h-4 shrink-0 text-[var(--ok)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-          <span>Live Project Database Volumes are preserved & protected</span>
-        </div>
-
-        <button onclick="switchTab('playbook')" class="w-full py-2.5 px-4 rounded-[var(--r)] text-white font-mono font-bold text-xs tracking-wider transition active:scale-95 flex items-center justify-center gap-2" style="background: var(--g-ok); box-shadow: 0 8px 20px -8px rgb(16 185 129 / .5);">
-          <span>View 4-Step Optimization Playbook</span>
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
-        </button>
-      </div>
-
-    </section>
-
-    <!-- Main Navigation Tabs (4 Clean Tabs - Removed Giant Files) -->
-    <div class="mt-8">
-      <nav class="flex items-center gap-2 p-1.5 desk-card-2 overflow-x-auto" aria-label="Tabs">
+    <!-- Main Navigation Tabs (Transparent background, responsive stack on mobile) -->
+    <div class="mt-6">
+      <nav class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 bg-transparent border-0 p-0" aria-label="Tabs">
         
-        <!-- Tab 1: DDEV & Docker / Colima (Default View) -->
-        <button id="tabBtn-ddev" onclick="switchTab('ddev')" class="tab-btn flex items-center gap-2.5 px-5 py-2.5 rounded-[var(--r)] font-mono font-bold text-xs transition-all text-white shadow-md whitespace-nowrap" style="background: var(--g-accent);">
-          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-          <span>DDEV & Docker (Colima)</span>
-          <span id="tabCount-ddev" class="text-xs px-2 py-0.5 rounded-[calc(var(--r)-2px)] font-mono font-bold bg-[var(--surface)] text-[var(--accent)] border border-[var(--edge)]">--</span>
+        <!-- Tab 1: Projects (Default Workspace) -->
+        <button id="tabBtn-ddev" onclick="switchTab('ddev')" class="tab-btn tab-active flex items-center justify-between sm:justify-start gap-2.5 px-6 py-2.5 rounded-[var(--r)] text-sm font-bold transition-all shadow-sm whitespace-nowrap w-full sm:w-auto">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span class="tracking-wide">Projects</span>
+          </div>
+          <span id="tabCount-ddev" class="text-xs px-2 py-0.5 rounded font-mono font-bold">--</span>
         </button>
 
-        <!-- Tab 2: Database Dumps -->
-        <button id="tabBtn-dumps" onclick="switchTab('dumps')" class="tab-btn flex items-center gap-2.5 px-5 py-2.5 rounded-[var(--r)] font-mono font-medium text-xs transition-all text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-3)] whitespace-nowrap">
-          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-          </svg>
-          <span>Database Dumps</span>
-          <span id="tabCount-dumps" class="text-xs px-2 py-0.5 rounded-[calc(var(--r)-2px)] font-mono font-bold bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]">--</span>
+        <!-- Tab 2: Storage & Database Dumps (Merged) -->
+        <button id="tabBtn-storage" onclick="switchTab('storage')" class="tab-btn flex items-center justify-between sm:justify-start gap-2.5 px-6 py-2.5 rounded-[var(--r)] text-sm font-bold transition-all text-[var(--muted)] hover:text-white hover:bg-[var(--surface-2)] whitespace-nowrap w-full sm:w-auto">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+            </svg>
+            <span class="tracking-wide">Storage & Database Dumps</span>
+          </div>
+          <span id="tabCount-storage" class="text-xs px-2 py-0.5 rounded font-mono font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">~100 GB</span>
         </button>
 
-        <!-- Tab 3: Dev Build Artifacts -->
-        <button id="tabBtn-artifacts" onclick="switchTab('artifacts')" class="tab-btn flex items-center gap-2.5 px-5 py-2.5 rounded-[var(--r)] font-mono font-medium text-xs transition-all text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-3)] whitespace-nowrap">
-          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
-          <span>Dev Build Artifacts</span>
-          <span id="tabCount-artifacts" class="text-xs px-2 py-0.5 rounded-[calc(var(--r)-2px)] font-mono font-bold bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]">--</span>
-        </button>
-
-        <!-- Tab 4: Optimization Playbook -->
-        <button id="tabBtn-playbook" onclick="switchTab('playbook')" class="tab-btn flex items-center gap-2.5 px-5 py-2.5 rounded-[var(--r)] font-mono font-medium text-xs transition-all text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-3)] whitespace-nowrap">
-          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Optimization Playbook</span>
+        <!-- Tab 3: Docker & Colima Engine -->
+        <button id="tabBtn-docker" onclick="switchTab('docker')" class="tab-btn flex items-center justify-between sm:justify-start gap-2.5 px-6 py-2.5 rounded-[var(--r)] text-sm font-bold transition-all text-[var(--muted)] hover:text-white hover:bg-[var(--surface-2)] whitespace-nowrap w-full sm:w-auto">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+            </svg>
+            <span class="tracking-wide">Docker & Colima Engine</span>
+          </div>
+          <span id="tabCount-docker" class="text-xs px-2 py-0.5 rounded font-mono font-bold bg-[var(--surface-2)] text-[var(--muted)] border border-[var(--line)]">-- vols</span>
         </button>
 
       </nav>
     </div>
 
-    <!-- TAB: Database Dumps -->
-    <div id="tabContent-dumps" class="tab-panel mt-6 hidden">
+    <!-- ============================================================= -->
+    <!-- TAB 1: PROJECTS & COCKPIT (Default Tab)                       -->
+    <!-- ============================================================= -->
+    <div id="tabContent-ddev" class="tab-panel mt-6">
+      
+      <!-- Active Running Projects Panel (Pinned at Top) -->
+      <section class="orbit-card p-5 mb-6 border-l-4 border-l-emerald-500">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--line)]">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <div>
+              <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Active Projects (<span id="ddevRunningCount">--</span>)</h2>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="promptActionExec('ddev_stop_all', 'Stop All DDEV Projects', 'ddev stop --all', 'Stops all running DDEV containers across all projects to free system RAM and Mutagen sync caches. Your database containers and project files are completely preserved.')" class="px-3 py-1.5 text-xs font-medium rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-300 border border-[var(--line)] transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+              </svg>
+              <span>Stop All Running</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="ddevRunningProjectsList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="text-xs text-[var(--muted)] font-mono py-6 col-span-2 text-center">Checking running containers...</div>
+        </div>
+      </section>
+
+      <!-- All / Stopped Projects Workspace -->
+      <section class="orbit-card p-5">
+        
+        <!-- Header & Filter Toolbar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-[var(--line)]">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Projects (<span id="ddevStoppedCount">--</span> Stopped)</h2>
+            <span id="ddevDirtySummaryBadge" class="hidden text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono font-medium flex items-center gap-1.5 bg-amber-950/60 text-amber-400 border border-amber-800/40" title="Projects with uncommitted changes or untracked files">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+              <span id="ddevDirtySummaryText">-- with changes</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-3">
+            <!-- App Drawer Grid Launcher Button -->
+            <button onclick="openAppDrawerModal()" class="px-3.5 py-2 rounded-[var(--r)] text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 border-2 border-black shadow-[3px_3px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition flex items-center gap-2" title="Launch App Drawer grid (macOS / iPad style app launcher with project logos)">
+              <svg class="w-4 h-4 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+              <span>App Drawer</span>
+              <span id="appDrawerBadgeCount" class="px-1.5 py-0.2 rounded bg-black/40 text-[11px] font-mono font-bold text-indigo-200">--</span>
+            </button>
+            <span class="text-xs text-[var(--faint)] font-mono hidden md:inline">~/Sites</span>
+          </div>
+        </div>
+
+        <!-- Filter and Sort Bar -->
+        <div class="flex flex-wrap items-center gap-2.5 mb-5 p-2.5 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)]">
+          
+          <!-- Search input -->
+          <div class="relative flex-1 min-w-[220px]">
+            <input type="text" id="ddevStoppedSearch" oninput="renderDdevSection()" placeholder="Filter projects, branches, paths, PHP..." class="w-full bg-[var(--bg)] border border-[var(--edge)] rounded-[var(--r)] pl-8 pr-3 py-1.5 text-xs text-zinc-100 placeholder-[var(--faint)] focus:outline-none focus:border-indigo-500 font-mono">
+            <svg class="w-3.5 h-3.5 text-[var(--muted)] absolute left-2.5 top-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <!-- Sort Dropdown -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs text-[var(--muted)]">Sort:</span>
+            <select id="ddevStoppedSort" onchange="renderDdevSection()" class="bg-[var(--bg)] border border-[var(--edge)] rounded-[var(--r)] px-2.5 py-1.5 text-xs font-medium text-zinc-200 focus:outline-none focus:border-indigo-500">
+              <option value="newest">Newest Modified</option>
+              <option value="dirty">Most Changes / Untracked</option>
+              <option value="oldest">Oldest Modified</option>
+              <option value="alpha_asc">Name (A-Z)</option>
+              <option value="alpha_desc">Name (Z-A)</option>
+              <option value="size">Dumps Size</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table Column Alignment Header & Scroll Wrapper -->
+        <div class="overflow-x-auto pb-1">
+          <div class="min-w-[1100px]">
+            <!-- Column Labels Header -->
+            <div class="flex items-center justify-between px-3.5 py-1 text-[10px] font-mono text-[var(--faint)] uppercase tracking-wider select-none mb-1.5">
+              <div class="grid items-center gap-2" style="grid-template-columns: 140px 145px 110px 140px 90px 95px;">
+                <span>Project</span>
+                <span>Branch</span>
+                <span>Git State</span>
+                <span>Search</span>
+                <span>Dist</span>
+                <span>Dumps</span>
+              </div>
+              <div class="w-[378px] flex items-center gap-2 text-center">
+                <span class="w-[100px]">Setup</span>
+                <span class="w-[58px]">Start</span>
+                <span class="w-[84px]">Profile</span>
+                <span class="w-[32px]">Logs</span>
+                <span class="w-[32px]">Finder</span>
+                <span class="w-[32px]">Path</span>
+              </div>
+            </div>
+
+            <!-- Stopped Projects List -->
+            <div id="ddevStoppedProjectsList" class="space-y-2">
+              <div class="text-xs text-[var(--muted)] font-mono py-8 text-center">Loading workspace projects...</div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 2: STORAGE & DATABASE DUMPS (Unified Optimizer)           -->
+    <!-- ============================================================= -->
+    <div id="tabContent-storage" class="tab-panel mt-6 hidden space-y-6 pb-28">
+      <!-- Section Header -->
+      <div class="mb-5 pb-3 border-b border-[var(--line)]">
+        <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Storage & Database Dumps</h2>
+        <p class="text-xs text-[var(--muted)] mt-1 font-medium">Multi-select SQL dumps, host APFS storage analysis, Colima datadisk trimming, and build artifacts</p>
+      </div>
       
       <!-- Filter and summary bar -->
-      <div class="desk-card p-4 mb-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div class="orbit-card p-4 mb-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         
         <div class="flex flex-wrap items-center gap-3 flex-1">
           <!-- Search input -->
           <div class="relative w-full sm:w-80">
-            <input type="text" id="dumpsSearchInput" oninput="onSearchOrFilterChange()" placeholder="Filter dumps, projects, extensions..." class="w-full bg-[var(--bg-2)] border border-[var(--edge)] rounded-[var(--r)] pl-9 pr-3 py-2 text-xs font-mono text-[var(--text)] placeholder-[var(--faint)] focus:outline-none focus:border-[var(--accent)]">
+            <input type="text" id="dumpsSearchInput" oninput="onSearchOrFilterChange()" placeholder="Filter dumps, projects, extensions..." class="w-full bg-[var(--bg)] border border-[var(--edge)] rounded-[var(--r)] pl-9 pr-3 py-2 text-xs font-mono text-zinc-100 placeholder-[var(--faint)] focus:outline-none focus:border-indigo-500">
             <svg class="w-4 h-4 text-[var(--muted)] absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
           
           <!-- Location Filter -->
-          <select id="dumpsFilterSelect" onchange="onSearchOrFilterChange()" class="bg-[var(--bg-2)] border border-[var(--edge)] rounded-[var(--r)] px-3 py-2 text-xs font-mono font-bold text-[var(--text)] focus:outline-none focus:border-[var(--accent)]">
+          <select id="dumpsFilterSelect" onchange="onSearchOrFilterChange()" class="bg-[var(--bg)] border border-[var(--edge)] rounded-[var(--r)] px-3 py-2 text-xs font-medium text-zinc-200 focus:outline-none focus:border-indigo-500">
             <option value="all">All Locations</option>
             <option value="Downloads/DB">Downloads/DB</option>
             <option value="Project Snapshot">Project Snapshots</option>
@@ -369,7 +678,7 @@
           </select>
 
           <!-- Age Filter -->
-          <select id="dumpsAgeFilterSelect" onchange="onSearchOrFilterChange()" class="bg-[var(--bg-2)] border border-[var(--edge)] rounded-[var(--r)] px-3 py-2 text-xs font-mono font-bold text-[var(--text)] focus:outline-none focus:border-[var(--accent)]">
+          <select id="dumpsAgeFilterSelect" onchange="onSearchOrFilterChange()" class="bg-[var(--bg)] border border-[var(--edge)] rounded-[var(--r)] px-3 py-2 text-xs font-medium text-zinc-200 focus:outline-none focus:border-indigo-500">
             <option value="all">Any Age</option>
             <option value="older14">Older than 14 days</option>
             <option value="older30">Older than 30 days</option>
@@ -377,61 +686,61 @@
           </select>
 
           <!-- Selection helpers -->
-          <button onclick="selectAllDumps(true)" class="px-3.5 py-2 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] text-xs font-mono font-bold border border-[var(--edge)] transition">
+          <button onclick="selectAllDumps(true)" class="px-3 py-2 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-200 text-xs font-medium border border-[var(--line)] transition">
             Select All
           </button>
-          <button onclick="clearDumpsSelection()" class="px-3.5 py-2 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-[var(--text)] text-xs font-mono font-bold border border-[var(--edge)] transition">
+          <button onclick="clearDumpsSelection()" class="px-3 py-2 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-white text-xs font-medium border border-[var(--line)] transition">
             Deselect
           </button>
         </div>
 
         <div class="text-xs text-[var(--muted)] font-mono flex items-center gap-3">
-          <span class="desk-card-2 px-3 py-1.5">
-            Showing <strong id="dumpsCountText" class="text-[var(--text)] font-bold">--</strong> items
+          <span class="px-3 py-1.5 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)]">
+            Showing <strong id="dumpsCountText" class="text-white font-semibold">--</strong> items
           </span>
-          <span class="desk-card-2 px-3 py-1.5">
-            Total: <strong id="dumpsSizeText" class="text-[var(--warn)] font-bold">--</strong>
+          <span class="px-3 py-1.5 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)]">
+            Total: <strong id="dumpsSizeText" class="text-amber-400 font-semibold">--</strong>
           </span>
         </div>
       </div>
 
-      <!-- Floating/Sticky Multi-Select Action Toolbar -->
-      <div id="dumpsSelectionBar" class="hidden mb-4 p-4 desk-card border-2 border-[var(--accent)] shadow-2xl flex flex-wrap items-center justify-between gap-4" style="background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);">
+      <!-- Floating Multi-Select Action Dock (Smooth slide-in, zero layout shift) -->
+      <div id="dumpsSelectionBar" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-2xl p-4 orbit-card border-2 border-indigo-500 shadow-2xl bg-[var(--surface-2)]/95 backdrop-blur-md rounded-2xl flex flex-wrap items-center justify-between gap-4 transition-all duration-300 ease-out transform translate-y-32 opacity-0 pointer-events-none">
         <div class="flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-[var(--r)] flex items-center justify-center font-display text-white text-sm shadow" style="background: var(--g-accent);">
+          <div class="w-8 h-8 rounded-[var(--r)] flex items-center justify-center font-bold text-white text-xs shadow bg-indigo-600">
             <span id="selectedCountNumber">0</span>
           </div>
           <div>
-            <div class="text-xs font-mono font-bold text-[var(--text)] flex items-center gap-2">
+            <div class="text-xs font-medium text-white flex items-center gap-2">
               <span id="selectedCountText">0 items selected</span>
               <span class="text-[var(--faint)]">•</span>
-              <span id="selectedSizeText" class="text-[var(--warn)] font-bold">0 B</span>
+              <span id="selectedSizeText" class="text-amber-400 font-mono font-semibold">0 B</span>
             </div>
-            <div class="text-[11px] text-[var(--muted)] font-mono mt-0.5">Hold <kbd class="px-1.5 py-0.5 bg-[var(--bg-2)] rounded-[calc(var(--r)-2px)] text-[var(--text)] border border-[var(--edge)]">Shift</kbd> for range, <kbd class="px-1.5 py-0.5 bg-[var(--bg-2)] rounded-[calc(var(--r)-2px)] text-[var(--text)] border border-[var(--edge)]">Ctrl/Cmd</kbd> for toggle</div>
+            <div class="text-[11px] text-[var(--muted)] mt-0.5">Hold <kbd class="px-1 py-0.2 bg-[var(--bg)] rounded text-zinc-300 border border-[var(--edge)]">Shift</kbd> for range, <kbd class="px-1 py-0.2 bg-[var(--bg)] rounded text-zinc-300 border border-[var(--edge)]">Ctrl/Cmd</kbd> for toggle</div>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <button onclick="trashSelectedDumps()" class="flex items-center gap-1.5 px-4 py-2 rounded-[var(--r)] text-white font-mono font-bold text-xs shadow transition active:scale-95" style="background: var(--g-bad);">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="flex items-center gap-2.5">
+          <button onclick="trashSelectedDumps()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--r)] text-white font-medium text-xs bg-rose-600 hover:bg-rose-500 shadow transition active:scale-95">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            Trash Selected
+            <span>Trash Selected</span>
           </button>
-          <button onclick="revealSelectedDump()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] font-mono font-bold text-xs transition">
-            <svg class="w-4 h-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <button id="dumpsRevealBtn" onclick="revealSelectedDump()" class="flex items-center gap-1.5 px-3 py-2 rounded-[var(--r)] bg-[var(--surface)] hover:bg-[var(--surface-3)] text-zinc-200 font-medium text-xs border border-[var(--line)] transition">
+            <svg class="w-3.5 h-3.5 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            Reveal in Finder
+            <span>Reveal in Finder</span>
           </button>
-          <button onclick="copySelectedDumpPaths()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] font-mono font-bold text-xs transition">
-            <svg class="w-4 h-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <button id="dumpsCopyBtn" onclick="copySelectedDumpPaths()" class="flex items-center gap-1.5 px-3 py-2 rounded-[var(--r)] bg-[var(--surface)] hover:bg-[var(--surface-3)] text-zinc-200 font-medium text-xs border border-[var(--line)] transition">
+            <svg class="w-3.5 h-3.5 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            Copy Paths
+            <span id="dumpsCopyBtnText">Copy Paths</span>
           </button>
-          <button onclick="clearDumpsSelection()" class="p-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-white transition" title="Clear Selection (Esc)">
+          <button onclick="clearDumpsSelection()" class="p-2 rounded-[var(--r)] bg-[var(--surface)] hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-white transition" title="Clear Selection (Esc)">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -440,40 +749,40 @@
       </div>
 
       <!-- Dumps Table Card -->
-      <div class="desk-card overflow-hidden">
+      <div class="orbit-card overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs border-collapse">
-            <thead class="bg-[var(--bg-2)] border-b border-[var(--line)] text-[var(--muted)] font-mono font-bold text-[11px] uppercase select-none">
+            <thead class="bg-[var(--surface-2)] border-b border-[var(--line)] text-[var(--muted)] font-medium text-[11px] uppercase tracking-wider select-none">
               <tr>
-                <th class="py-3.5 px-4 w-12 text-center">
-                  <input type="checkbox" id="dumpsSelectAllCheckbox" onchange="toggleSelectAllDumps(this.checked)" class="w-4 h-4 rounded-[calc(var(--r)-3px)] bg-[var(--surface-2)] border-[var(--edge)] cursor-pointer">
+                <th class="py-3 px-4 w-12 text-center">
+                  <input type="checkbox" id="dumpsSelectAllCheckbox" onchange="toggleSelectAllDumps(this.checked)" class="w-4 h-4 rounded bg-[var(--surface)] border-[var(--edge)] cursor-pointer">
                 </th>
-                <th class="py-3.5 px-4 cursor-pointer hover:text-[var(--text)] transition" onclick="toggleDumpsSort('name')">
+                <th class="py-3 px-4 cursor-pointer hover:text-white transition" onclick="toggleDumpsSort('name')">
                   <div class="flex items-center gap-1.5">
                     <span>File Name</span>
-                    <span id="sortIndicator-name" class="text-[var(--accent)] font-mono"></span>
+                    <span id="sortIndicator-name" class="text-indigo-400 font-mono"></span>
                   </div>
                 </th>
-                <th class="py-3.5 px-3">Project</th>
-                <th class="py-3.5 px-3 cursor-pointer hover:text-[var(--text)] transition" onclick="toggleDumpsSort('location')">
+                <th class="py-3 px-3">Project</th>
+                <th class="py-3 px-3 cursor-pointer hover:text-white transition" onclick="toggleDumpsSort('location')">
                   <div class="flex items-center gap-1.5">
                     <span>Location</span>
-                    <span id="sortIndicator-location" class="text-[var(--accent)] font-mono"></span>
+                    <span id="sortIndicator-location" class="text-indigo-400 font-mono"></span>
                   </div>
                 </th>
-                <th class="py-3.5 px-3 cursor-pointer hover:text-[var(--text)] transition" onclick="toggleDumpsSort('size')">
+                <th class="py-3 px-3 cursor-pointer hover:text-white transition" onclick="toggleDumpsSort('size')">
                   <div class="flex items-center gap-1.5">
                     <span>Size</span>
-                    <span id="sortIndicator-size" class="text-[var(--accent)] font-mono">▼</span>
+                    <span id="sortIndicator-size" class="text-indigo-400 font-mono">▼</span>
                   </div>
                 </th>
-                <th class="py-3.5 px-3 cursor-pointer hover:text-[var(--text)] transition" onclick="toggleDumpsSort('age')">
+                <th class="py-3 px-3 cursor-pointer hover:text-white transition" onclick="toggleDumpsSort('age')">
                   <div class="flex items-center gap-1.5">
                     <span>Age</span>
-                    <span id="sortIndicator-age" class="text-[var(--accent)] font-mono"></span>
+                    <span id="sortIndicator-age" class="text-indigo-400 font-mono"></span>
                   </div>
                 </th>
-                <th class="py-3.5 px-4 text-right">Actions</th>
+                <th class="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody id="dumpsTableBody" class="divide-y divide-[var(--line)] font-normal">
@@ -486,394 +795,432 @@
       </div>
 
       <!-- Safety Notice Box -->
-      <div class="mt-4 p-4 rounded-[var(--r)] flex items-start gap-3" style="background: var(--warn-bg); border: 1px solid var(--warn); color: var(--warn);">
-        <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="mt-4 p-3.5 rounded-[var(--r)] flex items-start gap-3 bg-amber-950/40 border border-amber-800/40 text-amber-300">
+        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <div class="leading-relaxed text-xs font-sans text-[var(--warn-ink)]">
-          <strong class="font-bold">Mac Trash Safety:</strong> Trashed files are moved into your macOS Trash (<code class="bg-black/25 px-1.5 py-0.5 rounded font-mono text-[var(--warn)]">~/.Trash</code>) rather than being deleted permanently. You can restore any file from the Trash at any time.
+        <div class="leading-relaxed text-xs">
+          <strong class="font-semibold">Reversible macOS Trash:</strong> Trashed files are moved into your macOS Trash (<code class="bg-black/40 px-1 py-0.2 rounded font-mono text-amber-400">~/.Trash</code>) rather than being permanently destroyed. You can restore any file from the Trash at any time.
         </div>
       </div>
-    </div>
 
-    <!-- TAB 1: DDEV & Colima (Docker - Default Tab) -->
-    <div id="tabContent-ddev" class="tab-panel mt-6">
+      <!-- Sub-Section Divider: Disk Space & Build Optimizer -->
+      <div class="pt-6 pb-2 border-b border-[var(--line)]">
+        <h3 class="text-lg sm:text-xl font-bold tracking-tight text-white">System Storage & Disk Space Optimizer</h3>
+        <p class="text-xs text-[var(--muted)] mt-0.5 font-medium">Host APFS storage analysis, Colima datadisk trimming, heavy build artifacts, and safe disk reclamation</p>
+      </div>
       
-      <!-- Colima Deep Dive Banner -->
-      <div class="p-6 desk-card mb-6 relative overflow-hidden" style="border-top: 4px solid var(--accent);">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+      <!-- Metrics Overview Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+        
+        <!-- Mac APFS System Disk Card -->
+        <div class="orbit-card p-5 flex flex-col justify-between">
           <div>
-            <div class="flex items-center gap-2.5 flex-wrap">
-              <h3 class="text-base font-display text-[var(--text)]">Colima VM Datadisk: <span id="colimaAllocatedTitle">-- GB</span> Allocated</h3>
-              <span id="colimaGainBadge" class="hidden px-2.5 py-0.5 rounded-[var(--r)] font-mono font-bold text-xs shadow-sm flex items-center gap-1 transition-all" style="background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok);">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-                <span id="colimaGainBadgeText">-0 GB Trimmed</span>
-              </span>
-              <span class="text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono font-bold" style="background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn);">Safe To Trim</span>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Mac APFS Storage</span>
+              <span id="diskAlertBadge" class="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">Healthy</span>
             </div>
-            <p class="text-xs text-[var(--muted)] mt-2 max-w-3xl leading-relaxed font-sans">
-              Colima uses a raw datadisk (<code class="bg-[var(--bg-2)] px-1.5 py-0.5 rounded font-mono text-[var(--accent)]">~/.colima/_lima/_disks/colima/datadisk</code>) for Docker container layers and build caches.
-              The actions below <strong>only remove recreatable layers and trim freed blocks</strong> — your project databases remain completely untouched.
+            <div class="flex items-baseline justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span id="diskFreeStr" class="text-3xl font-bold text-white tracking-tight">-- GB</span>
+                <span class="text-xs font-semibold text-[var(--muted)] uppercase font-mono">Free</span>
+              </div>
+              <span id="diskUsedStr" class="text-xs font-mono text-[var(--muted)]">-- GB used</span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-[var(--bg)] rounded-full h-2.5 overflow-hidden border border-[var(--line)]">
+              <div id="diskProgressBar" class="h-full rounded-full transition-all duration-700 bg-indigo-500" style="width: 50%;"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between mt-3 pt-3 border-t border-[var(--line)] text-xs text-[var(--muted)] font-mono">
+            <span>Total: <span id="diskTotalStr" class="text-white">-- GB</span></span>
+            <span id="diskPercentText" class="text-zinc-200">--% utilized</span>
+          </div>
+        </div>
+
+        <!-- Colima VM Datadisk Bloat Card -->
+        <div class="orbit-card p-5 flex flex-col justify-between border-t-2 border-t-indigo-500">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Colima Datadisk Bloat</span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-amber-950/60 text-amber-400 border border-amber-800/40">Safe To Trim</span>
+            </div>
+            <div class="flex items-baseline justify-between mb-2">
+              <span id="metricColimaDisk" class="text-3xl font-bold text-white tracking-tight">-- GB</span>
+              <span class="text-xs font-mono text-[var(--muted)]">Allocated Raw</span>
+            </div>
+            <p class="text-xs text-[var(--muted)] leading-relaxed">
+              Virtual disk retains deleted container blocks on macOS until trimmed via <code class="text-indigo-400 font-mono">fstrim</code>.
             </p>
           </div>
-          
-          <div class="flex flex-wrap items-center gap-3">
-            <button onclick="promptActionExec('colima_fstrim', 'Reclaim Colima Datadisk Space (fstrim)', 'colima ssh -- sudo fstrim -av', 'Executes fstrim inside Colima VM to discard unused blocks and shrink host disk allocation on macOS. 100% safe — does not modify container data.')" class="px-4 py-2.5 text-xs font-mono font-bold rounded-[var(--r)] text-white shadow-md transition active:scale-95 flex items-center gap-2" style="background: var(--g-ok); box-shadow: 0 8px 20px -8px rgb(16 185 129 / .5);">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="mt-3 pt-3 border-t border-[var(--line)]">
+            <button onclick="promptActionExec('colima_fstrim', 'Reclaim Colima Datadisk Space (fstrim)', 'colima ssh -- sudo fstrim -av', 'Executes fstrim inside Colima VM to discard unused blocks and shrink host disk allocation on macOS. 100% safe — does not modify container data.')" class="w-full py-2 px-3 rounded-[var(--r)] text-white text-xs font-medium bg-emerald-600 hover:bg-emerald-500 transition shadow-sm flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
               </svg>
-              Run Colima fstrim
-            </button>
-            <button onclick="promptActionExec('docker_builder_prune', 'Prune Docker Builder Cache', 'docker builder prune -af', 'Removes all unused Docker build cache layers. Safe and regenerates on demand during builds.')" class="px-4 py-2.5 text-xs font-mono font-bold rounded-[var(--r)] text-white shadow-md transition active:scale-95 flex items-center gap-2" style="background: var(--g-accent);">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Prune Build Cache
-            </button>
-            <button onclick="promptActionExec('docker_prune_containers', 'Prune Stopped Docker Containers', 'docker container prune -f', 'Prunes stopped Docker containers across projects. DDEV re-creates them automatically on next ddev start without affecting database volumes.')" class="px-3.5 py-2.5 text-xs font-mono font-bold rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] transition">
-              Prune Stopped Containers
-            </button>
-            <button onclick="triggerColimaRestart(this)" class="px-3.5 py-2.5 text-xs font-mono font-bold rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--accent)] border border-[var(--edge)] transition flex items-center gap-1.5" title="Restart Colima VM">
-              <svg class="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span>Restart Colima</span>
+              <span>Run Colima fstrim Now</span>
             </button>
           </div>
         </div>
 
-        <!-- Colima Resource Usage vs Settings Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-5 pt-4 border-t border-[var(--line)]">
-          <!-- RAM / Memory -->
-          <div class="p-3.5 rounded-[var(--r)] desk-card-2 flex flex-col justify-between">
-            <div class="flex items-center justify-between text-xs font-mono">
-              <span class="text-[var(--muted)] uppercase font-bold flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
-                Memory (RAM)
-              </span>
-              <span id="bannerMemPercent" class="font-bold text-[var(--accent)]">0%</span>
+        <!-- Reclaimable Space Potential Card -->
+        <div class="orbit-card p-5 flex flex-col justify-between border-t-2 border-t-emerald-500">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-emerald-400 uppercase tracking-wider">Reclaimable Space</span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">Safe To Recover</span>
             </div>
             <div class="my-2">
-              <div class="flex items-baseline gap-1.5 flex-wrap">
-                <span id="bannerMemUsed" class="text-xl font-display text-[var(--text)]">-- GiB</span>
-                <span class="text-xs text-[var(--muted)] font-mono">used of</span>
-                <span id="bannerMemSetting" class="text-xs font-bold text-[var(--text)] font-mono">-- GiB Setting</span>
-              </div>
-              <div class="w-full bg-[var(--bg)] rounded-full h-2 mt-2 overflow-hidden border border-[var(--edge)]">
-                <div id="bannerMemBar" class="h-full rounded-full transition-all duration-500" style="background: var(--g-accent); width: 0%;"></div>
+              <div id="potentialSavingsStr" class="text-4xl font-bold text-emerald-400 tracking-tight">
+                -- GB
               </div>
             </div>
-            <div class="text-[11px] text-[var(--faint)] font-mono flex items-center justify-between">
-              <span>Host Total: <span id="bannerHostRam">-- GB</span></span>
-              <button onclick="openColimaSettingsModal()" class="text-[var(--accent)] hover:underline">Change</button>
-            </div>
+            <p class="text-xs text-[var(--muted)] leading-relaxed">
+              DB dumps, Colima raw VM disk slack, Docker builder cache layers, and dev build caches.
+            </p>
           </div>
-
-          <!-- CPU Cores -->
-          <div class="p-3.5 rounded-[var(--r)] desk-card-2 flex flex-col justify-between">
-            <div class="flex items-center justify-between text-xs font-mono">
-              <span class="text-[var(--muted)] uppercase font-bold flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-[var(--warn)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                CPU Cores
-              </span>
-              <span id="bannerCpuPercent" class="font-bold text-[var(--warn)]">0%</span>
-            </div>
-            <div class="my-2">
-              <div class="flex items-baseline gap-1.5 flex-wrap">
-                <span id="bannerCpuLoad" class="text-xl font-display text-[var(--text)]">--</span>
-                <span class="text-xs text-[var(--muted)] font-mono">load on</span>
-                <span id="bannerCpuSetting" class="text-xs font-bold text-[var(--text)] font-mono">-- Cores Setting</span>
-              </div>
-              <div class="w-full bg-[var(--bg)] rounded-full h-2 mt-2 overflow-hidden border border-[var(--edge)]">
-                <div id="bannerCpuBar" class="h-full rounded-full transition-all duration-500" style="background: var(--g-warn); width: 0%;"></div>
-              </div>
-            </div>
-            <div class="text-[11px] text-[var(--faint)] font-mono flex items-center justify-between">
-              <span>Host Total: <span id="bannerHostCpu">--</span> Cores</span>
-              <button onclick="openColimaSettingsModal()" class="text-[var(--accent)] hover:underline">Change</button>
-            </div>
-          </div>
-
-          <!-- Disk Allocation -->
-          <div class="p-3.5 rounded-[var(--r)] desk-card-2 flex flex-col justify-between">
-            <div class="flex items-center justify-between text-xs font-mono">
-              <span class="text-[var(--muted)] uppercase font-bold flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-[var(--ok)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-                Datadisk
-              </span>
-              <span id="bannerDiskPercent" class="font-bold text-[var(--ok)]">--%</span>
-            </div>
-            <div class="my-2">
-              <div class="flex items-baseline gap-1.5 flex-wrap">
-                <span id="bannerDiskUsed" class="text-xl font-display text-[var(--text)]">-- GB</span>
-                <span class="text-xs text-[var(--muted)] font-mono">used of</span>
-                <span id="bannerDiskSetting" class="text-xs font-bold text-[var(--text)] font-mono">-- GiB Setting</span>
-              </div>
-              <div class="w-full bg-[var(--bg)] rounded-full h-2 mt-2 overflow-hidden border border-[var(--edge)]">
-                <div id="bannerDiskBar" class="h-full rounded-full transition-all duration-500" style="background: var(--g-ok); width: 0%;"></div>
-              </div>
-            </div>
-            <div class="text-[11px] text-[var(--faint)] font-mono flex items-center justify-between">
-              <span>Reclaimable via fstrim</span>
-              <button onclick="openColimaSettingsModal()" class="text-[var(--accent)] hover:underline">Settings</button>
-            </div>
+          <div class="mt-3 pt-3 border-t border-[var(--line)] text-xs text-emerald-400 font-medium flex items-center gap-1.5">
+            <svg class="w-4 h-4 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>Live Project DB volumes are preserved</span>
           </div>
         </div>
+
       </div>
 
-      <!-- DDEV Projects & Storage Section -->
-      <div class="space-y-6">
-
-        <!-- Active Running Projects Card (Pinned Top) -->
-        <div class="desk-card p-5" style="border-top: 4px solid var(--ok);">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--line)]">
-            <div class="flex items-center gap-3">
-              <span class="w-3 h-3 rounded-full bg-[var(--ok)] animate-pulse shrink-0"></span>
-              <div>
-                <h4 class="text-sm font-display text-[var(--text)]">Active Running Projects (<span id="ddevRunningCount">--</span>)</h4>
-                <p class="text-xs text-[var(--muted)] font-mono mt-0.5">Live containers in Docker • Click 'Open Site' to launch in browser</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2.5">
-              <button onclick="promptActionExec('ddev_stop_all', 'Stop All DDEV Projects', 'ddev stop --all', 'Stops all running DDEV containers across all projects to free system RAM and Mutagen sync caches. Your database containers and project files are completely preserved.')" class="px-3 py-1.5 text-xs font-mono font-bold rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] transition flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                </svg>
-                <span>Stop All Running</span>
-              </button>
-            </div>
-          </div>
-          <div id="ddevRunningProjectsList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            <div class="text-xs text-[var(--muted)] font-mono py-6 col-span-2 text-center">Checking running containers...</div>
-          </div>
-        </div>
-
-        <!-- Stopped Projects & Volumes Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <!-- Quick 1-Click Optimization Actions Toolbar -->
+      <div class="orbit-card p-5 mb-6">
+        <h3 class="text-base sm:text-lg font-bold text-white mb-3">1-Click Quick Storage Optimizations</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           
-          <!-- Stopped / Other Projects Card (7 cols) -->
-          <div class="lg:col-span-7 desk-card p-5 flex flex-col">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--line)]">
-              <div class="flex items-center gap-3 flex-wrap">
-                <div>
-                  <h4 class="text-sm font-bold text-[var(--text)] font-sans">Other Projects (<span id="ddevStoppedCount">--</span> Stopped)</h4>
-                  <p class="text-xs text-[var(--muted)] font-mono mt-0.5">Dormant projects in ~/Sites • Databases protected</p>
-                </div>
-                <span id="ddevDirtySummaryBadge" class="hidden text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono font-bold flex items-center gap-1.5 shadow-sm" style="background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn);" title="Projects with uncommitted changes or untracked files">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[var(--warn)] animate-pulse"></span>
-                  <span id="ddevDirtySummaryText">-- with changes</span>
-                </span>
-              </div>
-              <span class="text-xs text-[var(--faint)] font-mono">~/Sites</span>
+          <button onclick="promptActionExec('colima_fstrim', 'Reclaim Colima Datadisk Space (fstrim)', 'colima ssh -- sudo fstrim -av', 'Executes fstrim inside Colima VM to discard unused blocks and shrink host disk allocation on macOS. 100% safe — does not modify container data.')" class="p-3 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--line)] text-left transition flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-white">Trim Colima VM</span>
+              <span class="text-[10px] font-mono text-emerald-400 font-semibold">+40 to 60 GB</span>
             </div>
+            <p class="text-[11px] text-[var(--muted)]">Runs fstrim inside VM to discard freed APFS disk blocks.</p>
+          </button>
 
-            <!-- Filters and Sorting Bar for Other Projects -->
-            <div class="flex flex-wrap items-center gap-2.5 mb-4 p-2.5 desk-card-2">
-              <div class="relative flex-1 min-w-[160px]">
-                <input type="text" id="ddevStoppedSearch" oninput="renderDdevSection()" placeholder="Filter name, branch, changes, path..." class="w-full bg-[var(--bg-2)] border border-[var(--edge)] rounded-[var(--r)] pl-8 pr-2.5 py-1.5 text-xs font-mono text-[var(--text)] placeholder-[var(--faint)] focus:outline-none focus:border-[var(--accent)]">
-                <svg class="w-3.5 h-3.5 text-[var(--muted)] absolute left-2.5 top-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-
-              <!-- Sort Dropdown -->
-              <div class="flex items-center gap-1.5">
-                <span class="text-[11px] text-[var(--muted)] font-mono">Sort:</span>
-                <select id="ddevStoppedSort" onchange="renderDdevSection()" class="bg-[var(--bg-2)] border border-[var(--edge)] rounded-[var(--r)] px-2.5 py-1.5 text-xs font-mono font-bold text-[var(--text)] focus:outline-none">
-                  <option value="newest">Newest Modified</option>
-                  <option value="dirty">Most Changes / Untracked</option>
-                  <option value="oldest">Oldest Modified</option>
-                  <option value="alpha_asc">Name (A-Z)</option>
-                  <option value="alpha_desc">Name (Z-A)</option>
-                  <option value="size">Dumps Size</option>
-                </select>
-              </div>
-
-              <!-- Has Search Filter Pill -->
-              <button id="ddevFilterSearchOnly" onclick="toggleDdevSearchFilter()" class="px-2.5 py-1.5 rounded-[var(--r)] text-xs font-mono font-bold border transition desk-card hover:bg-[var(--surface-3)] text-[var(--muted)] border-[var(--edge)]">
-                Search Setups Only
-              </button>
-
-              <!-- Changed / Untracked Filter Pill -->
-              <button id="ddevFilterDirtyOnly" onclick="toggleDdevDirtyFilter()" class="px-2.5 py-1.5 rounded-[var(--r)] text-xs font-mono font-bold border transition desk-card hover:bg-[var(--surface-3)] text-[var(--muted)] border-[var(--edge)] flex items-center gap-1.5" title="Filter to projects with uncommitted changes or untracked files">
-                <span class="w-2 h-2 rounded-full bg-[var(--warn)]"></span>
-                <span>Uncommitted / Untracked</span>
-              </button>
+          <button onclick="promptActionExec('docker_builder_prune', 'Prune Docker Builder Cache', 'docker builder prune -af', 'Removes all unused Docker build cache layers. Safe and regenerates on demand during builds.')" class="p-3 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--line)] text-left transition flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-white">Prune Build Cache</span>
+              <span class="text-[10px] font-mono text-indigo-400 font-semibold">Safe</span>
             </div>
+            <p class="text-[11px] text-[var(--muted)]">Clears accumulated Docker build cache layers.</p>
+          </button>
 
-            <div id="ddevStoppedProjectsList" class="space-y-2.5 max-h-[580px] overflow-y-auto pr-1 flex-1">
-              <div class="text-xs text-[var(--muted)] font-mono py-6 text-center">Loading stopped projects...</div>
+          <button onclick="promptActionExec('docker_prune_containers', 'Prune Stopped Docker Containers', 'docker container prune -f', 'Prunes stopped Docker containers across projects. DDEV re-creates them automatically on next ddev start without affecting database volumes.')" class="p-3 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--line)] text-left transition flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-white">Prune Stopped Containers</span>
+              <span class="text-[10px] font-mono text-zinc-400 font-semibold">Recreatable</span>
             </div>
-          </div>
+            <p class="text-[11px] text-[var(--muted)]">Removes inactive containers. Recreated automatically on start.</p>
+          </button>
 
-          <!-- Docker Volumes Breakdown Card (5 cols) -->
-          <div class="lg:col-span-5 desk-card p-5 flex flex-col">
-            <div class="flex items-center justify-between mb-4 pb-3 border-b border-[var(--line)]">
-              <div>
-                <h4 class="text-sm font-bold text-[var(--text)] font-sans">Docker Volumes (<span id="ddevVolumesCount">--</span>)</h4>
-                <p class="text-xs text-[var(--muted)] font-mono mt-0.5">Database storage & Mutagen volume layers</p>
-              </div>
-              <button onclick="promptActionExec('docker_prune_volumes', 'Prune Dangling Unnamed Volumes', 'docker volume prune -f', 'Removes unreferenced anonymous Docker volumes. Named project database volumes are protected and will NOT be deleted.')" class="px-3 py-1.5 text-xs font-mono font-bold rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] transition">
-                Prune Anonymous
-              </button>
+          <button onclick="promptActionExec('clean_xcode_derived_data', 'Clean Xcode DerivedData', 'Move DerivedData to ~/.Trash', 'Safely moves all cached Xcode DerivedData build directories to macOS Trash.')" class="p-3 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--line)] text-left transition flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-white">Clean Xcode DerivedData</span>
+              <span class="text-[10px] font-mono text-amber-400 font-semibold">To Trash</span>
             </div>
-            <div id="ddevVolumesList" class="space-y-2 max-h-[640px] overflow-y-auto pr-1 flex-1">
-              <div class="text-xs text-[var(--muted)] font-mono py-6 text-center">Loading volumes...</div>
-            </div>
-          </div>
+            <p class="text-[11px] text-[var(--muted)]">Moves cached Xcode build artifacts safely into Trash.</p>
+          </button>
 
         </div>
-
       </div>
 
-    </div>
-
-    <!-- TAB 3: Dev Artifacts -->
-    <div id="tabContent-artifacts" class="tab-panel mt-6 hidden">
-      <div class="desk-card p-6">
+      <!-- Dev Build Artifacts Section -->
+      <div class="orbit-card p-5 mb-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-[var(--line)]">
           <div>
-            <h3 class="text-sm font-bold text-[var(--text)] font-sans">Project Build Artifacts & System Caches</h3>
-            <p class="text-xs text-[var(--muted)] mt-0.5 font-sans"><code class="text-[var(--text)] font-mono">node_modules</code>, <code class="text-[var(--text)] font-mono">vendor</code>, and Xcode DerivedData directories (safe to delete, automatically re-created via npm/composer/xcode)</p>
+            <h4 class="text-sm font-semibold text-white">Project Build Artifacts (<code class="text-indigo-400 font-mono text-xs">node_modules</code> & <code class="text-indigo-400 font-mono text-xs">vendor</code>)</h4>
+            <p class="text-xs text-[var(--muted)] mt-0.5">Heavy project dependencies safely regenerable via npm install or composer install</p>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="text-xs font-mono text-[var(--muted)]">Total detected: <strong id="artifactsTotalSize" class="text-[var(--warn)] font-bold text-sm">-- GB</strong></span>
-          </div>
+          <span class="text-xs font-mono text-[var(--muted)]">Total detected: <strong id="artifactsTotalSize" class="text-amber-400 font-semibold">-- GB</strong></span>
         </div>
 
         <div id="artifactsList" class="divide-y divide-[var(--line)]">
           <div class="text-xs text-[var(--muted)] font-mono py-8 text-center">Scanning project build directories...</div>
         </div>
       </div>
+
+      <!-- Optimization Playbook Cards -->
+      <div class="orbit-card p-5">
+        <h3 class="text-lg sm:text-xl font-bold text-white mb-4 pb-3 border-b border-[var(--line)]">4-Step Guided Optimization Playbook</h3>
+        <div class="space-y-4">
+          
+          <div class="p-4 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)] flex items-start gap-3.5">
+            <span class="w-6 h-6 rounded flex items-center justify-center font-bold text-xs bg-emerald-950 text-emerald-400 border border-emerald-800/40 shrink-0">1</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-semibold text-white">Clean Old Database Dumps in ~/Downloads/DB</span>
+                <span class="text-[11px] font-mono font-semibold text-emerald-400">+28.5 GB Immediate</span>
+              </div>
+              <p class="text-xs text-[var(--muted)] mt-1">Select and trash outdated dumps and asset exports from the Database Dumps tab.</p>
+              <button onclick="switchTab('dumps')" class="mt-2.5 px-3 py-1.5 rounded-[var(--r)] text-xs font-medium bg-[var(--surface)] hover:bg-[var(--surface-3)] text-zinc-200 border border-[var(--line)] transition">
+                Open Database Dumps Tab ↗
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)] flex items-start gap-3.5">
+            <span class="w-6 h-6 rounded flex items-center justify-center font-bold text-xs bg-indigo-950 text-indigo-400 border border-indigo-800/40 shrink-0">2</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-semibold text-white">Trim Colima Host Datadisk Space (fstrim)</span>
+                <span class="text-[11px] font-mono font-semibold text-indigo-400">+40 to +60 GB on Mac</span>
+              </div>
+              <p class="text-xs text-[var(--muted)] mt-1">Colima does not shrink raw disk automatically when container files are deleted. Run fstrim inside Colima to discard unused blocks.</p>
+              <button onclick="promptActionExec('colima_fstrim', 'Run Colima fstrim', 'colima ssh -- sudo fstrim -av', 'Executes fstrim inside Colima to trim freed blocks and reclaim APFS disk space without modifying container data.')" class="mt-2.5 px-3 py-1.5 rounded-[var(--r)] text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition">
+                Execute fstrim Now
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)] flex items-start gap-3.5">
+            <span class="w-6 h-6 rounded flex items-center justify-center font-bold text-xs bg-purple-950 text-purple-400 border border-purple-800/40 shrink-0">3</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-semibold text-white">Prune Dangling Docker Images & Stopped Containers</span>
+                <span class="text-[11px] font-mono font-semibold text-purple-400">+15 to +30 GB</span>
+              </div>
+              <p class="text-xs text-[var(--muted)] mt-1">Unused image layers and stopped containers accumulate over time. DDEV automatically pulls or recreates whatever it needs.</p>
+              <button onclick="promptActionExec('docker_prune_images', 'Prune Unused Docker Images', 'docker image prune -af', 'Removes all unused Docker image layers.')" class="mt-2.5 px-3 py-1.5 rounded-[var(--r)] text-xs font-medium bg-[var(--surface)] hover:bg-[var(--surface-3)] text-zinc-200 border border-[var(--line)] transition">
+                Prune Unused Images Now
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
 
-    <!-- TAB 4: Optimization Playbook -->
-    <div id="tabContent-playbook" class="tab-panel mt-6 hidden">
-      <div class="space-y-5">
+    <!-- ============================================================= -->
+    <!-- TAB 4: DOCKER & COLIMA ENGINE                                 -->
+    <!-- ============================================================= -->
+    <div id="tabContent-docker" class="tab-panel mt-6 hidden">
+      <!-- Section Header -->
+      <div class="mb-5 pb-3 border-b border-[var(--line)]">
+        <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Docker & Colima Engine</h2>
+        <p class="text-xs text-[var(--muted)] mt-1 font-medium">Real-time VM utilization, live container sidecars, persistent database volumes, and cached image layers</p>
+      </div>
+      
+      <!-- Colima VM Resource Deep Dive -->
+      <div class="orbit-card p-5 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--line)]">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Colima Resources</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="triggerColimaRestart(this)" class="px-3 py-1.5 text-xs font-medium rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-200 border border-[var(--line)] transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>Restart Colima</span>
+            </button>
+            <button onclick="openColimaSettingsModal()" class="px-3 py-1.5 text-xs font-medium rounded-[var(--r)] bg-indigo-600 hover:bg-indigo-500 text-white transition">
+              Adjust Resources
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- RAM / Memory -->
+          <div class="p-4 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)] flex flex-col justify-between">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-[var(--muted)] uppercase font-semibold">Memory (RAM)</span>
+              <span id="bannerMemPercent" class="font-bold text-indigo-400">0%</span>
+            </div>
+            <div class="my-3">
+              <div class="flex items-baseline gap-1.5 flex-wrap">
+                <span id="bannerMemUsed" class="text-2xl font-bold text-white font-mono">-- GiB</span>
+                <span class="text-xs text-[var(--muted)] font-mono">used of</span>
+                <span id="bannerMemSetting" class="text-xs font-semibold text-zinc-200 font-mono">-- GiB Setting</span>
+              </div>
+              <div class="w-full bg-[var(--bg)] rounded-full h-2 mt-2 overflow-hidden border border-[var(--line)]">
+                <div id="bannerMemBar" class="h-full rounded-full transition-all duration-500 bg-indigo-500" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-[var(--line)] flex items-center justify-between text-xs font-mono">
+              <span class="text-zinc-300 font-medium">Mac Host Total:</span>
+              <span class="px-2 py-0.5 rounded bg-[var(--surface-3)] text-white font-bold border border-[var(--edge)]" id="bannerHostRam">-- GB</span>
+            </div>
+          </div>
+
+          <!-- CPU Cores -->
+          <div class="p-4 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)] border-t-2 border-t-amber-500 flex flex-col justify-between">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-zinc-200 uppercase font-semibold">CPU Cores</span>
+              <span id="bannerCpuPercent" class="font-bold text-amber-300">0%</span>
+            </div>
+            <div class="my-3">
+              <div class="flex items-baseline gap-1.5 flex-wrap">
+                <span id="bannerCpuLoad" class="text-2xl font-bold text-white font-mono">--</span>
+                <span class="text-xs text-[var(--muted)] font-mono">load on</span>
+                <span id="bannerCpuSetting" class="text-xs font-semibold text-zinc-200 font-mono">-- Cores Setting</span>
+              </div>
+              <div class="w-full bg-[var(--bg)] rounded-full h-2 mt-2 overflow-hidden border border-[var(--line)]">
+                <div id="bannerCpuBar" class="h-full rounded-full transition-all duration-500 bg-amber-400" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-[var(--line)] flex items-center justify-between text-xs font-mono">
+              <span class="text-zinc-300 font-medium">Mac Host Cores:</span>
+              <span class="px-2 py-0.5 rounded bg-[var(--surface-3)] text-white font-bold border border-[var(--edge)]"><span id="bannerHostCpu">--</span> Cores</span>
+            </div>
+          </div>
+
+          <!-- Disk Allocation -->
+          <div class="p-4 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)] flex flex-col justify-between">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-[var(--muted)] uppercase font-semibold">Datadisk Limit</span>
+              <span id="bannerDiskPercent" class="font-bold text-emerald-400">--%</span>
+            </div>
+            <div class="my-3">
+              <div class="flex items-baseline gap-1.5 flex-wrap">
+                <span id="bannerDiskUsed" class="text-2xl font-bold text-white font-mono">-- GB</span>
+                <span class="text-xs text-[var(--muted)] font-mono">used of</span>
+                <span id="bannerDiskSetting" class="text-xs font-semibold text-zinc-200 font-mono">-- GiB Setting</span>
+              </div>
+              <div class="w-full bg-[var(--bg)] rounded-full h-2 mt-2 overflow-hidden border border-[var(--line)]">
+                <div id="bannerDiskBar" class="h-full rounded-full transition-all duration-500 bg-emerald-500" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-[var(--line)] flex items-center justify-between text-xs font-mono">
+              <span class="text-zinc-300 font-medium">Space Recovery:</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 font-bold border border-emerald-700/50">fstrim enabled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Containers & Volumes Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
-        <!-- Step 1: Downloads DB dumps -->
-        <div class="desk-card p-5 relative" style="border-left: 4px solid var(--ok);">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex items-start gap-3.5">
-              <span class="w-8 h-8 rounded-[var(--r)] flex items-center justify-center font-display text-sm shrink-0" style="background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok);">1</span>
-              <div>
-                <div class="flex items-center gap-2.5">
-                  <h4 class="text-sm font-bold text-[var(--text)] font-sans">Clean Old Database Dumps in Downloads</h4>
-                  <span class="text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono font-bold" style="background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok);">Immediate +28.5 GB</span>
-                </div>
-                <p class="text-xs text-[var(--muted)] mt-1.5 leading-relaxed font-sans">
-                  Your <code class="bg-[var(--bg-2)] px-1.5 py-0.5 rounded text-[var(--warn)] font-mono">~/Downloads/DB</code> directory contains massive asset exports and database dumps. Select multiple items in the Database Dumps tab to trash them safely.
-                </p>
-                <div class="mt-4 flex flex-wrap items-center gap-2.5">
-                  <button onclick="revealDownloadsDB()" class="px-4 py-2 rounded-[var(--r)] text-white text-xs font-mono font-bold shadow-md transition flex items-center gap-1.5" style="background: var(--g-accent);">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Reveal ~/Downloads/DB in Finder
-                  </button>
-                  <button onclick="switchTab('dumps')" class="px-4 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] text-xs font-mono font-bold transition">
-                    Manage Dumps in Tab 1
-                  </button>
-                </div>
-              </div>
+        <!-- Live Containers (Docker Desktop gap closer!) -->
+        <div class="lg:col-span-7 orbit-card p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-[var(--line)]">
+            <div>
+              <h3 class="text-lg sm:text-xl font-bold tracking-tight text-white">Docker Containers (<span id="dockerContainersCount">--</span>)</h3>
+              <p class="text-xs text-[var(--muted)] mt-0.5">Live containers, helper sidecars & port mappings</p>
             </div>
+            <button onclick="promptActionExec('docker_prune_containers', 'Prune Stopped Docker Containers', 'docker container prune -f', 'Prunes stopped Docker containers across projects.')" class="px-2.5 py-1 text-xs font-medium rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-300 border border-[var(--line)] transition">
+              Prune Stopped
+            </button>
+          </div>
+          <div id="dockerContainersList" class="space-y-2 max-h-[580px] overflow-y-auto pr-1 flex-1">
+            <div class="text-xs text-[var(--muted)] font-mono py-6 text-center">Loading containers...</div>
           </div>
         </div>
 
-        <!-- Step 2: Shrink Colima datadisk -->
-        <div class="desk-card p-5 relative" style="border-left: 4px solid var(--accent);">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex items-start gap-3.5">
-              <span class="w-8 h-8 rounded-[var(--r)] flex items-center justify-center font-display text-sm shrink-0" style="background: var(--surface-2); color: var(--accent); border: 1px solid var(--accent);">2</span>
-              <div class="flex-1">
-                <div class="flex items-center gap-2.5">
-                  <h4 class="text-sm font-bold text-[var(--text)] font-sans">Trim Colima Host Datadisk Space (fstrim)</h4>
-                  <span class="text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono font-bold" style="background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn);">+40 to +60 GB on Mac</span>
-                </div>
-                <p class="text-xs text-[var(--muted)] mt-1.5 leading-relaxed font-sans">
-                  Colima's raw VM disk does not shrink automatically on macOS when blocks are freed inside Linux. Run fstrim directly from this dashboard to discard unused blocks and reclaim APFS disk space safely:
-                </p>
-                <div class="mt-4 flex flex-wrap items-center gap-2.5">
-                  <button onclick="promptActionExec('colima_fstrim', 'Run Colima fstrim', 'colima ssh -- sudo fstrim -av', 'Executes fstrim inside Colima to trim freed blocks and reclaim APFS disk space without modifying container data.')" class="px-4 py-2 rounded-[var(--r)] text-white text-xs font-mono font-bold shadow-md transition" style="background: var(--g-ok);">
-                    Execute Colima fstrim Now
-                  </button>
-                  <button onclick="promptActionExec('docker_builder_prune', 'Prune Docker Build Cache', 'docker builder prune -af', 'Removes all unused Docker build cache layers.')" class="px-4 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] text-xs font-mono font-bold transition">
-                    Prune Docker Build Cache
-                  </button>
-                </div>
-              </div>
+        <!-- Docker Volumes Breakdown -->
+        <div class="lg:col-span-5 orbit-card p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-[var(--line)]">
+            <div>
+              <h3 class="text-lg sm:text-xl font-bold tracking-tight text-white">Docker Volumes (<span id="ddevVolumesCount">--</span>)</h3>
+              <p class="text-xs text-[var(--muted)] mt-0.5">Database storage & Mutagen cache layers</p>
+            </div>
+            <button onclick="promptActionExec('docker_prune_volumes', 'Prune Dangling Unnamed Volumes', 'docker volume prune -f', 'Removes unreferenced anonymous Docker volumes. Named project database volumes are protected and will NOT be deleted.')" class="px-2.5 py-1 text-xs font-medium rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-300 border border-[var(--line)] transition">
+              Prune Anonymous
+            </button>
+          </div>
+
+          <!-- Volume Type Explainer Guide -->
+          <div class="mb-3 p-2.5 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)] text-[11px] leading-relaxed space-y-1 font-mono">
+            <div class="flex items-center gap-1.5 text-emerald-300">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+              <strong class="text-white">Database (Preserved):</strong> Project MySQL/MariaDB data. Kept safe across stops.
+            </div>
+            <div class="flex items-center gap-1.5 text-indigo-300">
+              <span class="w-2 h-2 rounded-full bg-indigo-400 shrink-0"></span>
+              <strong class="text-white">Mutagen Cache:</strong> macOS-to-container speed sync. Safe to recreate.
             </div>
           </div>
-        </div>
 
-        <!-- Step 3: Prune Recreatable Images & Stopped Containers -->
-        <div class="desk-card p-5 relative" style="border-left: 4px solid var(--review);">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex items-start gap-3.5">
-              <span class="w-8 h-8 rounded-[var(--r)] flex items-center justify-center font-display text-sm shrink-0" style="background: var(--surface-2); color: var(--review); border: 1px solid var(--review);">3</span>
-              <div class="flex-1">
-                <div class="flex items-center gap-2.5">
-                  <h4 class="text-sm font-bold text-[var(--text)] font-sans">Prune Dangling Docker Images & Stopped Containers</h4>
-                  <span class="text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono font-bold" style="background: var(--surface-2); color: var(--review); border: 1px solid var(--edge);">+15 to +30 GB</span>
-                </div>
-                <p class="text-xs text-[var(--muted)] mt-1.5 leading-relaxed font-sans">
-                  Unused image layers and stopped containers build up over time. DDEV automatically pulls or re-creates whatever it needs when you start a project.
-                </p>
-                <div class="mt-4 flex flex-wrap items-center gap-2.5">
-                  <button onclick="promptActionExec('docker_prune_images', 'Prune Unused Docker Images', 'docker image prune -af', 'Removes all unused Docker image layers.')" class="px-4 py-2 rounded-[var(--r)] text-white text-xs font-mono font-bold shadow-md transition" style="background: var(--g-review);">
-                    Prune Unused Images Now
-                  </button>
-                  <button onclick="promptActionExec('docker_prune_containers', 'Prune Stopped Containers', 'docker container prune -f', 'Prunes stopped Docker containers across projects.')" class="px-4 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] text-xs font-mono font-bold transition">
-                    Prune Stopped Containers
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 4: Caches & DerivedData -->
-        <div class="desk-card p-5 relative" style="border-left: 4px solid var(--stale);">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex items-start gap-3.5">
-              <span class="w-8 h-8 rounded-[var(--r)] flex items-center justify-center font-display text-sm shrink-0" style="background: var(--stale-bg); color: var(--stale); border: 1px solid var(--stale);">4</span>
-              <div class="flex-1">
-                <div class="flex items-center gap-2.5">
-                  <h4 class="text-sm font-bold text-[var(--text)] font-sans">Clean Developer & Package Caches</h4>
-                  <span class="text-xs px-2.5 py-0.5 rounded-[var(--r)] font-mono font-bold" style="background: var(--stale-bg); color: var(--stale); border: 1px solid var(--stale);">+10 to +20 GB</span>
-                </div>
-                <p class="text-xs text-[var(--muted)] mt-1.5 leading-relaxed font-sans">
-                  Package caches and Xcode build caches safely replenish automatically when needed:
-                </p>
-                <div class="mt-4 flex flex-wrap items-center gap-2.5">
-                  <button onclick="promptActionExec('clean_npm_cache', 'Clean Global npm Cache', 'npm cache clean --force', 'Force cleans the global npm cache directory.')" class="px-4 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] text-xs font-mono font-bold transition">
-                    Clean npm Cache Now
-                  </button>
-                  <button onclick="promptActionExec('clean_xcode_derived_data', 'Clean Xcode DerivedData', 'Move DerivedData to ~/.Trash', 'Safely moves all cached Xcode DerivedData build directories to macOS Trash.')" class="px-4 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--text)] text-xs font-mono font-bold transition">
-                    Clean Xcode DerivedData Now
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div id="ddevVolumesList" class="space-y-2 max-h-[580px] overflow-y-auto pr-1 flex-1">
+            <div class="text-xs text-[var(--muted)] font-mono py-6 text-center">Loading volumes...</div>
           </div>
         </div>
 
       </div>
+
+      <!-- Docker Images Manager (Docker Desktop Parity) -->
+      <div class="orbit-card p-5 mt-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--line)]">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg sm:text-xl font-bold tracking-tight text-white">Docker Images (<span id="dockerImagesCount">--</span>)</h3>
+              <span id="dockerDanglingBadge" class="hidden text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-amber-950/60 text-amber-400 border border-amber-800/40">-- Dangling</span>
+            </div>
+            <p class="text-xs text-[var(--muted)] mt-0.5">Base images, custom DDEV web/db builds & dangling image layers</p>
+          </div>
+          
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="promptActionExec('docker_prune_dangling_images', 'Prune Dangling (<none>) Images', 'docker image prune -f', 'Safely removes dangling untagged image layers (<none>:<none>). Existing named project images are preserved.')" class="px-3 py-1.5 text-xs font-medium rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-amber-300 border border-amber-500/30 transition flex items-center gap-1.5" title="Prune untagged dangling images">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>Prune Dangling</span>
+            </button>
+            <button onclick="promptActionExec('docker_prune_images', 'Prune All Unused Docker Images', 'docker image prune -af', 'Removes all unused Docker image layers not currently tied to a running container.')" class="px-3 py-1.5 text-xs font-medium rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-300 border border-[var(--line)] transition flex items-center gap-1.5">
+              <span>Deep Prune All</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar for Images -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 p-2.5 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)]">
+          <div class="relative flex-1 min-w-[200px]">
+            <input type="text" id="dockerImagesSearch" oninput="renderDockerImages()" placeholder="Filter images by repository, tag, or ID..." class="w-full bg-[var(--bg)] border border-[var(--edge)] rounded-[var(--r)] pl-8 pr-3 py-1.5 text-xs text-zinc-100 placeholder-[var(--faint)] focus:outline-none focus:border-indigo-500 font-mono">
+            <svg class="w-3.5 h-3.5 text-[var(--muted)] absolute left-2.5 top-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button onclick="setDockerImageFilter('all')" id="imgFilter-all" class="px-2.5 py-1 rounded-[var(--r)] text-xs font-mono font-medium text-white bg-indigo-600 transition">All</button>
+            <button onclick="setDockerImageFilter('dangling')" id="imgFilter-dangling" class="px-2.5 py-1 rounded-[var(--r)] text-xs font-mono font-medium text-[var(--muted)] hover:text-white bg-[var(--bg)] border border-[var(--line)] transition">Dangling</button>
+            <button onclick="setDockerImageFilter('ddev')" id="imgFilter-ddev" class="px-2.5 py-1 rounded-[var(--r)] text-xs font-mono font-medium text-[var(--muted)] hover:text-white bg-[var(--bg)] border border-[var(--line)] transition">DDEV Builds</button>
+          </div>
+        </div>
+
+        <!-- Images Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-[var(--line)] text-[var(--muted)] font-mono uppercase text-[10px] tracking-wider">
+                <th class="py-2.5 px-3">Repository</th>
+                <th class="py-2.5 px-3">Tag</th>
+                <th class="py-2.5 px-3">Image ID</th>
+                <th class="py-2.5 px-3">Size</th>
+                <th class="py-2.5 px-3">Type</th>
+                <th class="py-2.5 px-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dockerImagesTableBody" class="divide-y divide-[var(--line)] font-mono">
+              <tr>
+                <td colspan="6" class="py-6 text-center text-[var(--muted)]">Loading Docker images...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
   </main>
 
+  <!-- ============================================================= -->
+  <!-- MODALS & TOAST NOTIFICATIONS                                  -->
+  <!-- ============================================================= -->
+
   <!-- Action Execution Confirmation Modal -->
   <div id="actionModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="desk-card border border-[var(--edge)] rounded-[var(--r)] max-w-lg w-full p-6 shadow-2xl relative">
+    <div class="orbit-card border border-[var(--edge)] rounded-[var(--r)] max-w-lg w-full p-6 shadow-2xl relative bg-[var(--surface)]">
       
       <div class="flex items-center justify-between pb-3 border-b border-[var(--line)]">
-        <h3 id="modalTitle" class="text-base font-display text-[var(--text)]">Execute Action</h3>
-        <button onclick="closeExecModal()" class="text-[var(--muted)] hover:text-white p-1 rounded transition">
+        <h3 id="modalTitle" class="text-base font-semibold text-white">Execute Action</h3>
+        <button onclick="closeExecModal()" class="btn-ghost text-[var(--muted)] hover:text-white p-1 transition">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -881,30 +1228,30 @@
       </div>
 
       <div class="mt-4 space-y-3.5">
-        <p id="modalDesc" class="text-xs text-[var(--muted)] leading-relaxed font-sans">Action description</p>
+        <p id="modalDesc" class="text-xs text-[var(--muted)] leading-relaxed">Action description</p>
 
         <div>
-          <label class="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--muted)] block mb-1">Command to run:</label>
-          <div class="bg-[var(--bg-2)] p-3 rounded-[var(--r)] border border-[var(--edge)] font-mono text-xs text-[var(--accent)] overflow-x-auto flex items-center justify-between gap-2">
+          <label class="text-[11px] font-mono font-medium uppercase tracking-wider text-[var(--muted)] block mb-1">Command to run:</label>
+          <div class="bg-[var(--bg)] p-3 rounded-[var(--r)] border border-[var(--line)] font-mono text-xs text-indigo-300 overflow-x-auto flex items-center justify-between gap-2">
             <span id="modalCmdText">command</span>
-            <button onclick="copyModalCmd()" class="text-xs text-[var(--muted)] hover:text-white shrink-0 px-2.5 py-1 rounded-[calc(var(--r)-2px)] bg-[var(--surface)] border border-[var(--edge)] font-mono">Copy</button>
+            <button onclick="copyModalCmd()" class="text-xs text-[var(--muted)] hover:text-white shrink-0 px-2 py-1 rounded bg-[var(--surface-2)] border border-[var(--line)] font-mono">Copy</button>
           </div>
         </div>
 
         <!-- Execution Progress / Output -->
         <div id="modalOutputSection" class="hidden">
-          <label class="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--muted)] block mb-1">Execution Output:</label>
-          <div id="modalOutputBox" class="bg-[var(--bg-2)] p-3 rounded-[var(--r)] border border-[var(--edge)] font-mono text-xs max-h-48 overflow-y-auto whitespace-pre-wrap text-[var(--text)]">
+          <label class="text-[11px] font-mono font-medium uppercase tracking-wider text-[var(--muted)] block mb-1">Execution Output:</label>
+          <div id="modalOutputBox" class="bg-[var(--bg)] p-3 rounded-[var(--r)] border border-[var(--line)] font-mono text-xs max-h-56 overflow-y-auto whitespace-pre-wrap text-zinc-300">
             Waiting for execution...
           </div>
         </div>
       </div>
 
-      <div class="mt-6 flex items-center justify-end gap-3 pt-3 border-t border-[var(--line)]">
-        <button id="modalCancelBtn" onclick="closeExecModal()" class="px-4 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--muted)] font-mono font-bold text-xs transition">
+      <div class="mt-6 flex items-center justify-end gap-2.5 pt-3 border-t border-[var(--line)]">
+        <button id="modalCancelBtn" onclick="closeExecModal()" class="px-3.5 py-2 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-300 font-medium text-xs transition">
           Cancel
         </button>
-        <button id="modalRunBtn" onclick="runConfirmedAction()" class="px-5 py-2 rounded-[var(--r)] text-white font-mono font-bold text-xs shadow-md transition flex items-center gap-2" style="background: var(--g-accent);">
+        <button id="modalRunBtn" onclick="runConfirmedAction()" class="px-4 py-2 rounded-[var(--r)] text-white font-medium text-xs bg-indigo-600 hover:bg-indigo-500 shadow transition flex items-center gap-2">
           <svg id="modalSpinner" class="w-4 h-4 text-white hidden animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
@@ -916,18 +1263,18 @@
   </div>
 
   <!-- Colima Settings Modal -->
-  <div id="colimaModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-    <div class="desk-card border border-[var(--edge)] rounded-[var(--r)] max-w-lg w-full p-6 shadow-2xl relative">
+  <div id="colimaModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="orbit-card border border-[var(--edge)] rounded-[var(--r)] max-w-lg w-full p-6 shadow-2xl relative bg-[var(--surface)]">
       
       <div class="flex items-center justify-between pb-3 border-b border-[var(--line)]">
         <div class="flex items-center gap-2.5">
-          <svg class="w-5 h-5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <h3 class="text-base font-display text-[var(--text)]">Colima VM Resource Settings</h3>
+          <h3 class="text-base font-semibold text-white">Colima VM Resource Settings</h3>
         </div>
-        <button onclick="closeColimaSettingsModal()" class="text-[var(--muted)] hover:text-white p-1 rounded transition">
+        <button onclick="closeColimaSettingsModal()" class="btn-ghost text-[var(--muted)] hover:text-white p-1 transition">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -936,32 +1283,32 @@
 
       <div class="mt-4 space-y-4">
         <!-- Live Usage vs Settings Pill Banner -->
-        <div id="colimaModalUsageBanner" class="p-3 rounded-[var(--r)] desk-card-2 border border-[var(--edge)] flex flex-col gap-1.5 text-xs font-mono">
+        <div id="colimaModalUsageBanner" class="p-3 rounded-[var(--r)] bg-[var(--surface-2)] border border-[var(--line)] flex flex-col gap-1.5 text-xs font-mono">
           <div class="flex items-center justify-between">
             <span class="text-[var(--muted)]">Live RAM Usage:</span>
-            <span id="modalRamUsageText" class="font-bold text-[var(--accent)]">--</span>
+            <span id="modalRamUsageText" class="font-bold text-indigo-400">--</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-[var(--muted)]">Live CPU Load:</span>
-            <span id="modalCpuUsageText" class="font-bold text-[var(--warn)]">--</span>
+            <span id="modalCpuUsageText" class="font-bold text-amber-400">--</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-[var(--muted)]">Datadisk Allocated:</span>
-            <span id="modalDiskUsageText" class="font-bold text-[var(--ok)]">--</span>
+            <span id="modalDiskUsageText" class="font-bold text-emerald-400">--</span>
           </div>
         </div>
 
         <!-- Quick Presets -->
         <div>
-          <label class="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--muted)] block mb-1.5">Quick Presets</label>
+          <label class="text-[11px] font-mono font-medium uppercase tracking-wider text-[var(--muted)] block mb-1.5">Quick Presets</label>
           <div class="grid grid-cols-3 gap-2">
-            <button onclick="applyColimaPreset(2, 4)" class="px-2.5 py-1.5 rounded-[var(--r)] text-xs font-mono font-bold desk-card-2 hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-white border border-[var(--edge)] transition">
+            <button onclick="applyColimaPreset(2, 4)" class="px-2.5 py-1.5 rounded-[var(--r)] text-xs font-medium bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-300 hover:text-white border border-[var(--line)] transition">
               Eco (2C / 4G)
             </button>
-            <button onclick="applyColimaPreset(4, 8)" class="px-2.5 py-1.5 rounded-[var(--r)] text-xs font-mono font-bold desk-card-2 hover:bg-[var(--surface-3)] text-[var(--accent)] border border-[var(--edge)] transition">
+            <button onclick="applyColimaPreset(4, 8)" class="px-2.5 py-1.5 rounded-[var(--r)] text-xs font-medium bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-indigo-400 border border-[var(--line)] transition">
               Standard (4C / 8G)
             </button>
-            <button onclick="applyColimaPreset(6, 12)" class="px-2.5 py-1.5 rounded-[var(--r)] text-xs font-mono font-bold desk-card-2 hover:bg-[var(--surface-3)] text-[var(--ok)] border border-[var(--edge)] transition">
+            <button onclick="applyColimaPreset(6, 12)" class="px-2.5 py-1.5 rounded-[var(--r)] text-xs font-medium bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-emerald-400 border border-[var(--line)] transition">
               Power (6C / 12G)
             </button>
           </div>
@@ -970,8 +1317,8 @@
         <!-- CPU Cores -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label for="colimaInputCpu" class="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--muted)]">CPU Cores</label>
-            <span id="colimaCpuDisplay" class="text-xs font-mono font-bold text-[var(--accent)]">4 Cores</span>
+            <label for="colimaInputCpu" class="text-[11px] font-mono font-medium uppercase tracking-wider text-[var(--muted)]">CPU Cores</label>
+            <span id="colimaCpuDisplay" class="text-xs font-mono font-bold text-indigo-400">4 Cores</span>
           </div>
           <input type="range" id="colimaInputCpu" min="1" max="16" step="1" value="4" oninput="updateColimaSettingsLabels()" class="w-full accent-indigo-500 cursor-pointer">
           <div class="flex justify-between text-[10px] text-[var(--faint)] font-mono">
@@ -984,8 +1331,8 @@
         <!-- Memory / RAM -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label for="colimaInputMem" class="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--muted)]">Memory (RAM)</label>
-            <span id="colimaMemDisplay" class="text-xs font-mono font-bold text-[var(--accent)]">8 GiB</span>
+            <label for="colimaInputMem" class="text-[11px] font-mono font-medium uppercase tracking-wider text-[var(--muted)]">Memory (RAM)</label>
+            <span id="colimaMemDisplay" class="text-xs font-mono font-bold text-indigo-400">8 GiB</span>
           </div>
           <input type="range" id="colimaInputMem" min="2" max="32" step="2" value="8" oninput="updateColimaSettingsLabels()" class="w-full accent-indigo-500 cursor-pointer">
           <div class="flex justify-between text-[10px] text-[var(--faint)] font-mono">
@@ -998,24 +1345,24 @@
         <!-- Disk Allocation -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label for="colimaInputDisk" class="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--muted)]">Datadisk Limit (GiB)</label>
-            <span id="colimaDiskDisplay" class="text-xs font-mono font-bold text-[var(--accent)]">100 GiB</span>
+            <label for="colimaInputDisk" class="text-[11px] font-mono font-medium uppercase tracking-wider text-[var(--muted)]">Datadisk Limit (GiB)</label>
+            <span id="colimaDiskDisplay" class="text-xs font-mono font-bold text-indigo-400">100 GiB</span>
           </div>
-          <input type="number" id="colimaInputDisk" min="30" max="500" value="100" class="w-full bg-[var(--bg-2)] border border-[var(--edge)] rounded-[var(--r)] px-3 py-2 text-xs font-mono text-[var(--text)] focus:outline-none focus:border-[var(--accent)]">
+          <input type="number" id="colimaInputDisk" min="30" max="500" value="100" class="w-full bg-[var(--bg)] border border-[var(--edge)] rounded-[var(--r)] px-3 py-2 text-xs font-mono text-zinc-100 focus:outline-none focus:border-indigo-500">
           <p class="text-[11px] text-[var(--muted)] font-mono mt-1">
-            * Note: Colima disk size can only be maintained or increased; shrinking requires recreating the VM.
+            * Note: Colima disk size can be maintained or expanded; shrinking requires recreating the VM.
           </p>
         </div>
 
-        <div id="colimaSettingsOutput" class="hidden p-3 rounded-[var(--r)] bg-[var(--bg-2)] border border-[var(--edge)] font-mono text-xs whitespace-pre-wrap"></div>
+        <div id="colimaSettingsOutput" class="hidden p-3 rounded-[var(--r)] bg-[var(--bg)] border border-[var(--line)] font-mono text-xs whitespace-pre-wrap"></div>
       </div>
 
       <div class="mt-6 flex items-center justify-between gap-3 pt-3 border-t border-[var(--line)]">
         <div class="flex items-center gap-2">
-          <button id="colimaToggleRunningBtn" onclick="toggleColimaLifecycle()" class="px-3 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-xs font-mono font-bold transition flex items-center gap-1.5">
+          <button id="colimaToggleRunningBtn" onclick="toggleColimaLifecycle()" class="px-3 py-1.5 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-xs font-medium text-zinc-300 transition flex items-center gap-1.5">
             <span>Start Colima</span>
           </button>
-          <button id="colimaRestartModalBtn" onclick="triggerColimaRestart(this)" class="px-3 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--accent)] text-xs font-mono font-bold transition flex items-center gap-1.5" title="Restart Colima VM">
+          <button id="colimaRestartModalBtn" onclick="triggerColimaRestart(this)" class="px-3 py-1.5 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-indigo-400 text-xs font-medium transition flex items-center gap-1.5" title="Restart Colima VM">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
@@ -1024,10 +1371,10 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="closeColimaSettingsModal()" class="px-3.5 py-2 rounded-[var(--r)] desk-card-2 hover:bg-[var(--surface-3)] text-[var(--muted)] font-mono font-bold text-xs transition">
+          <button onclick="closeColimaSettingsModal()" class="px-3.5 py-1.5 rounded-[var(--r)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--muted)] font-medium text-xs transition">
             Cancel
           </button>
-          <button id="colimaSaveRestartBtn" onclick="saveColimaSettings(true)" class="px-4 py-2 rounded-[var(--r)] text-white font-mono font-bold text-xs shadow-md transition flex items-center gap-1.5" style="background: var(--g-accent);">
+          <button id="colimaSaveRestartBtn" onclick="saveColimaSettings(true)" class="px-4 py-1.5 rounded-[var(--r)] text-white font-medium text-xs bg-indigo-600 hover:bg-indigo-500 shadow transition flex items-center gap-1.5">
             <span>Save & Apply</span>
           </button>
         </div>
@@ -1036,26 +1383,26 @@
     </div>
   </div>
 
-  <!-- Improved Dynamic Toast Notification -->
-  <div id="toast" onmouseenter="pauseToastTimer()" onmouseleave="resumeToastTimer()" class="fixed bottom-6 right-6 desk-card border-2 border-[var(--accent)] shadow-2xl transition-all duration-300 transform translate-y-24 opacity-0 pointer-events-none z-50 overflow-hidden max-w-md w-full" style="background: var(--surface-2);">
+  <!-- Dynamic Toast Notification (8s countdown, hover-pause) -->
+  <div id="toast" onmouseenter="pauseToastTimer()" onmouseleave="resumeToastTimer()" class="fixed bottom-6 right-6 orbit-card border border-indigo-500/50 shadow-2xl transition-all duration-300 transform translate-y-24 opacity-0 pointer-events-none z-50 overflow-hidden max-w-md w-full bg-[var(--surface-2)]">
     <div class="p-4 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div id="toastIconBox" class="w-8 h-8 rounded-[var(--r)] flex items-center justify-center shrink-0" style="background: var(--ok-bg); color: var(--ok);">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        <div id="toastIconBox" class="w-7 h-7 rounded-[calc(var(--r)-2px)] flex items-center justify-center shrink-0 bg-emerald-950/80 text-emerald-400 border border-emerald-800/50">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7" />
           </svg>
         </div>
         <div>
-          <div id="toastMsg" class="text-xs font-mono font-bold text-[var(--text)]">Action completed</div>
-          <div id="toastSubMsg" class="text-[11px] text-[var(--muted)] font-sans mt-0.5 hidden"></div>
+          <div id="toastMsg" class="text-xs font-semibold text-white">Action completed</div>
+          <div id="toastSubMsg" class="text-[11px] text-[var(--muted)] mt-0.5 hidden"></div>
         </div>
       </div>
       
       <div class="flex items-center gap-2">
-        <button id="toastActionBtn" class="hidden px-2.5 py-1 text-xs font-mono font-bold rounded-[var(--r)] bg-[var(--surface)] text-[var(--accent)] border border-[var(--edge)] hover:bg-[var(--surface-3)] transition whitespace-nowrap">
+        <button id="toastActionBtn" class="hidden px-2.5 py-1 text-xs font-medium rounded bg-[var(--surface)] text-indigo-400 border border-[var(--edge)] hover:bg-[var(--surface-3)] transition whitespace-nowrap">
           Open Trash
         </button>
-        <button onclick="hideToast()" class="text-[var(--muted)] hover:text-white p-1 rounded transition" title="Dismiss">
+        <button onclick="hideToast()" class="btn-ghost text-[var(--muted)] hover:text-white p-1 transition" title="Dismiss">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -1063,11 +1410,156 @@
       </div>
     </div>
     <!-- Visual Countdown Progress Bar -->
-    <div class="w-full bg-[var(--bg-2)] h-1">
-      <div id="toastProgressBar" class="h-1 bg-[var(--accent)] toast-bar" style="width: 100%;"></div>
+    <div class="w-full bg-[var(--bg)] h-0.5">
+      <div id="toastProgressBar" class="h-0.5 bg-indigo-500 toast-bar" style="width: 100%;"></div>
     </div>
   </div>
 
-  <script src="app.js?v=studio10"></script>
+  <!-- Live Container Logs Viewer Modal (Docker Desktop Parity) -->
+  <div id="logsViewerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+    <div class="orbit-card border border-[var(--edge)] rounded-[var(--r)] max-w-5xl w-full h-[85vh] flex flex-col shadow-2xl relative bg-[var(--surface)] overflow-hidden">
+      
+      <!-- Logs Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 border-b border-[var(--line)] gap-3 bg-[var(--surface-2)]">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-[var(--r)] bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="logsModalTitle" class="text-sm font-bold text-white font-mono">Container Logs</h3>
+              <span id="logsModalTargetBadge" class="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">Active</span>
+            </div>
+            <p id="logsModalSubtitle" class="text-[11px] text-[var(--muted)] font-mono mt-0.5">Real-time container output stream</p>
+          </div>
+        </div>
+
+        <!-- Toolbar Controls -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Service selector (for DDEV projects: web, db, all) -->
+          <div id="logsServiceGroup" class="flex items-center rounded-[var(--r)] bg-[var(--bg)] p-0.5 border border-[var(--line)] text-xs">
+            <button onclick="changeLogsService('web')" id="logSvc-web" class="px-2.5 py-1 rounded-[calc(var(--r)-2px)] font-mono text-[11px] font-semibold text-white bg-indigo-600">web</button>
+            <button onclick="changeLogsService('db')" id="logSvc-db" class="px-2.5 py-1 rounded-[calc(var(--r)-2px)] font-mono text-[11px] font-medium text-[var(--muted)] hover:text-white">db</button>
+            <button onclick="changeLogsService('all')" id="logSvc-all" class="px-2.5 py-1 rounded-[calc(var(--r)-2px)] font-mono text-[11px] font-medium text-[var(--muted)] hover:text-white">all</button>
+          </div>
+
+          <!-- Tail Lines Selector -->
+          <div class="flex items-center gap-1 text-xs">
+            <span class="text-[11px] text-[var(--muted)] hidden md:inline">Tail:</span>
+            <select id="logsTailSelect" onchange="fetchLogsData()" class="bg-[var(--bg)] border border-[var(--edge)] rounded-[var(--r)] px-2 py-1 text-[11px] font-mono text-zinc-200 focus:outline-none">
+              <option value="50">50 lines</option>
+              <option value="150" selected>150 lines</option>
+              <option value="300">300 lines</option>
+              <option value="500">500 lines</option>
+              <option value="1000">1000 lines</option>
+            </select>
+          </div>
+
+          <!-- Live Auto Refresh Toggle -->
+          <button id="logsAutoRefreshBtn" onclick="toggleLogsAutoRefresh()" class="px-2.5 py-1 rounded-[var(--r)] text-[11px] font-mono font-medium flex items-center gap-1.5 bg-[var(--bg)] hover:bg-[var(--surface-3)] text-zinc-300 border border-[var(--line)] transition" title="Toggle automatic 3-second live refresh">
+            <span id="logsLiveDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Live (3s)</span>
+          </button>
+
+          <!-- Copy Button -->
+          <button onclick="copyLogsContent()" class="p-1.5 rounded-[var(--r)] bg-[var(--bg)] hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-white border border-[var(--line)] transition" title="Copy full logs to clipboard">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </button>
+
+          <!-- Close Modal -->
+          <button onclick="closeLogsModal()" class="btn-ghost text-[var(--muted)] hover:text-white p-1 transition ml-1" title="Close Logs (Esc)">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Logs Filter Toolbar -->
+      <div class="px-5 py-2 bg-[var(--bg)] border-b border-[var(--line)] flex items-center gap-3">
+        <div class="relative flex-1">
+          <input type="text" id="logsSearchInput" oninput="filterLogsView()" placeholder="Filter logs in real time (e.g. error, PHP, MySQL, POST, 500, worker)..." class="w-full bg-[var(--surface-2)] border border-[var(--edge)] rounded-[var(--r)] pl-8 pr-3 py-1.5 text-xs text-zinc-100 placeholder-[var(--faint)] focus:outline-none focus:border-indigo-500 font-mono">
+          <svg class="w-3.5 h-3.5 text-[var(--muted)] absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <div class="flex items-center gap-2 text-[11px] font-mono text-[var(--muted)] shrink-0">
+          <span id="logsMatchCount">-- lines</span>
+          <button onclick="scrollLogsToBottom()" class="px-2 py-1 rounded bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-zinc-300 border border-[var(--line)] transition">Scroll to Bottom</button>
+        </div>
+      </div>
+
+      <!-- Terminal Body -->
+      <div class="flex-1 bg-[#090a0f] p-4 overflow-y-auto font-mono text-xs leading-relaxed" id="logsTerminalContainer">
+        <pre id="logsTerminalOutput" class="text-zinc-300 whitespace-pre-wrap select-text break-all">Streaming logs...</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- APP DRAWER MODAL (Grid App Launcher with Logos & Brands)     -->
+  <!-- ============================================================= -->
+  <div id="appDrawerModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 transition-all duration-200 opacity-0 pointer-events-none">
+    <div class="orbit-card bg-[var(--surface)] border-2 border-[var(--edge)] w-full max-w-5xl max-h-[90vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden scale-95 transition-all duration-200" id="appDrawerBox">
+      
+      <!-- Drawer Header -->
+      <div class="px-6 py-4 bg-[var(--surface-2)] border-b border-[var(--line)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold tracking-tight text-white">App Drawer</h2>
+              <span id="appDrawerModalCount" class="text-xs px-2 py-0.5 rounded font-mono font-bold bg-indigo-950/80 text-indigo-300 border border-indigo-800/50">-- Stopped</span>
+            </div>
+            <p class="text-xs text-[var(--muted)] mt-0.5">Click any project tile to start it immediately • Press <kbd class="px-1 py-0.2 rounded bg-black/40 text-zinc-300 border border-[var(--line)] font-mono text-[10px]">Esc</kbd> to close</p>
+          </div>
+        </div>
+
+        <!-- Search in Drawer & Close -->
+        <div class="flex items-center gap-3">
+          <div class="relative w-full sm:w-64">
+            <input type="text" id="appDrawerSearchInput" oninput="filterAppDrawerGrid()" placeholder="Search apps (name, branch)..." class="w-full bg-[var(--bg)] border border-[var(--edge)] rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-zinc-100 placeholder-[var(--faint)] focus:outline-none focus:border-indigo-500">
+            <svg class="w-4 h-4 text-[var(--muted)] absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <button onclick="closeAppDrawerModal()" class="p-2 rounded-xl bg-[var(--bg)] hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-white border border-[var(--line)] transition" title="Close Drawer (Esc)">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Drawer App Grid Container -->
+      <div class="flex-1 overflow-y-auto p-6" id="appDrawerScrollArea">
+        <div id="appDrawerGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <!-- Dynamically populated tiles -->
+        </div>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="px-6 py-3 bg-[var(--surface-2)] border-t border-[var(--line)] flex items-center justify-between text-xs text-[var(--muted)] font-mono">
+        <div class="flex items-center gap-3">
+          <span>Tip: Hold <kbd class="px-1.5 py-0.5 rounded bg-black/40 text-amber-300 border border-amber-800/40 font-bold">Shift</kbd> + Click to launch with Search (+Solr/Elastic)</span>
+        </div>
+        <div>
+          <button onclick="closeAppDrawerModal()" class="px-3 py-1 rounded-[var(--r)] bg-[var(--surface)] hover:bg-[var(--surface-3)] text-zinc-300 border border-[var(--line)] transition">Done</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js?v=orbit3"></script>
 </body>
 </html>

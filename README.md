@@ -13,7 +13,11 @@ cd ~/j/ddev-orbit
 ./orbit
 ```
 
-This will automatically launch the local dashboard and open `http://localhost:7890` in your default browser.
+This will automatically launch the dashboard at **`https://orbit.ddev.site`** (or direct `http://localhost:7890`) in your default browser.
+
+### 📱 Installing as a Mac Desktop PWA
+- **In Safari (macOS Sonoma+)**: Open `https://orbit.ddev.site`, then click **File → Add to Dock...**. DDev Orbit installs as a native macOS application with its custom icon in your Dock and Launchpad!
+- **In Chrome / Edge**: Click the **"Install App"** button in the header bar or the install icon in the URL bar to install Orbit into your macOS Applications folder.
 
 ### Key Features
 
@@ -46,6 +50,13 @@ This will automatically launch the local dashboard and open `http://localhost:78
 5. **🧹 Disk Bloat Optimizer & Live Gain Notifications**:
    - Reclaim space from Colima datadisk (`fstrim`), Docker builder prune, stopped containers, Xcode `DerivedData`, dev artifacts, and database dumps (`.sspak`, `.sql`, `.zst`).
    - **Disk Space Gain Notifications**: Celebratory notifications and live animated badges (`+X GB Saved!`) highlight the exact amount of disk space reclaimed whenever optimization actions run or free disk space expands.
+
+6. **📱 App Drawer (Visual Grid Project Launcher)**:
+   - macOS / iPad-style tactile app drawer grid displaying all unstarted projects.
+   - Automatically detects brand logos (SVGs, PNGs, favicons) inside `themes/*/static`, `images/`, and `public/`.
+   - Reads primary brand theme colors directly from project `variables.scss` / stylesheets, with elegant fallback monograms.
+   - Click any tile to launch the project immediately with live spinner overlay; Shift+Click launches with attached search services (+Solr/Elastic).
+   - Real-time search filter and Escape key dismissal.
 
 ---
 
@@ -82,4 +93,23 @@ This will automatically launch the local dashboard and open `http://localhost:78
 
 - **Zero Immediate File Destruction:** "Move to Trash" in the UI moves items to macOS `~/.Trash` instead of using destructive commands, allowing complete reversibility.
 - **Project Code Integrity:** Pruning DDEV volumes or deleting stopped DDEV containers preserves your application git repositories and source code in `~/Sites`.
+
+---
+
+## 💡 Colima + DDev Orbit vs. Docker Desktop / Rancher Desktop
+
+### What do Docker Desktop and Rancher Desktop provide?
+Docker Desktop and Rancher Desktop provide an Electron desktop GUI showing raw container lists (`docker ps`), streaming logs, in-app container terminals, port visualizers, and image managers.
+
+### Why Colima + DDev Orbit is a better fit for DDEV on macOS:
+1. **DDEV Awareness**: Docker/Rancher Desktop have zero knowledge of DDEV projects, web URLs (`*.ddev.site`), search profiles (Solr/Elasticsearch), theme builds (`dist`), Git branches/uncommitted changes, or database dumps in `~/Downloads/DB`.
+2. **Zero Overhead & Zero Licensing Fees**: Docker Desktop requires expensive per-seat commercial subscriptions for larger organizations and runs heavy background daemons and telemetry that consume 1.5–3 GB of host RAM while idling. Colima is 100% free, open-source, and runs on macOS's native Virtualization framework (`vz`) with Rosetta 2 support.
+3. **No Hidden Virtual Disk Bloat**: Docker Desktop's `Docker.raw` disk image notoriously balloons to 100+ GB and does not shrink on macOS without manual reinstalls. DDev Orbit + Colima provides 1-click APFS block reclamation via `fstrim`.
+
+### Closing the Feature Gap:
+DDev Orbit includes features that give you the container visibility of Docker Desktop without the bloat:
+* **1-Click Container Logs**: Live container log inspector (`ddev logs` / `docker logs`) directly in the UI.
+* **Live Ports & Health**: Container list with exposed ports (Web, Mailpit, Database) and status.
+* **VM Resource Sliders & Presets**: Live CPU, RAM, and Datadisk monitoring with 1-click VM restart.
+
 
