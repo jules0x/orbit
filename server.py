@@ -17,7 +17,7 @@ from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 
 # Import scanner functions
-from scanner import full_audit, format_bytes, SITES_DIR, DOWNLOADS_DIR, HOME, COLIMA_DIR
+from scanner import full_audit, format_bytes, refresh_live_containers, get_git_info, SITES_DIR, DOWNLOADS_DIR, HOME, COLIMA_DIR
 
 PORT = 7890
 DATA_CACHE = None
@@ -129,6 +129,95 @@ def update_colima_config(cpu=None, memory=None, disk=None):
     except Exception as e:
         return False, str(e)
 
+def resolve_project_git_dir(project_name):
+    """Return validated approot for a known Git project."""
+    if not project_name or not re.match(r"^[a-zA-Z0-9_\.-]+$", project_name):
+        return None, "Invalid project name"
+
+    approot = None
+    if DATA_CACHE and "projects" in DATA_CACHE and project_name in DATA_CACHE["projects"]:
+        approot = DATA_CACHE["projects"][project_name].get("approot")
+    if not approot:
+        candidate = os.path.join(SITES_DIR, project_name)
+        if os.path.isdir(candidate):
+            approot = candidate
+
+    if not approot or not os.path.isdir(approot):
+        return None, f"Project directory not found for {project_name}"
+    if not os.path.exists(os.path.join(approot, ".git")):
+        return None, f"Project {project_name} is not a Git repository"
+    return approot, None
+
+def list_project_git_branches(approot):
+    """List local and remote-only Git branches sorted by most recent commit."""
+    cur_proc = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        cwd=approot,
+        capture_output=True,
+        text=True,
+        timeout=5
+    )
+    current_branch = cur_proc.stdout.strip() if cur_proc.returncode == 0 else ""
+
+    fmt = "%(refname:short)|%(refname)|%(committerdate:relative)"
+    ref_proc = subprocess.run(
+        ["git", "for-each-ref", "--sort=-committerdate", f"--format={fmt}", "refs/heads", "refs/remotes"],
+        cwd=approot,
+        capture_output=True,
+        text=True,
+        timeout=5
+    )
+    if ref_proc.returncode != 0:
+        return current_branch, [], ref_proc.stderr.strip() or "Failed to list branches"
+
+    local_branches = []
+    remote_candidates = []
+    local_names = set()
+
+    for line in ref_proc.stdout.splitlines():
+        parts = line.split("|", 2)
+        if len(parts) < 2:
+            continue
+        short_ref = parts[0].strip()
+        full_ref = parts[1].strip()
+        age = parts[2].strip() if len(parts) > 2 else ""
+
+        if full_ref.startswith("refs/heads/"):
+            name = full_ref[len("refs/heads/"):]
+            local_names.add(name)
+            local_branches.append({
+                "name": name,
+                "full_ref": short_ref,
+                "type": "local",
+                "age": age,
+                "is_current": (name == current_branch)
+            })
+        elif full_ref.startswith("refs/remotes/"):
+            # Skip symbolic remote HEAD pointers (e.g. origin/HEAD) and bare remote names
+            if short_ref.endswith("/HEAD") or "/" not in short_ref:
+                continue
+            remote_only_name = short_ref.split("/", 1)[1]
+            remote_candidates.append({
+                "name": remote_only_name,
+                "full_ref": short_ref,
+                "type": "remote",
+                "age": age,
+                "is_current": False
+            })
+
+    seen_remote_names = set()
+    remote_branches = []
+    for rb in remote_candidates:
+        if rb["name"] in local_names or rb["name"] in seen_remote_names:
+            continue
+        seen_remote_names.add(rb["name"])
+        remote_branches.append(rb)
+
+    # Pin current branch at top, followed by local branches, then remote-only branches
+    current_list = [b for b in local_branches if b["is_current"]]
+    other_local = [b for b in local_branches if not b["is_current"]]
+    return current_branch, current_list + other_local + remote_branches, None
+
 class OrbitHTTPHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         # Quiet log
@@ -173,7 +262,36 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                     Thread(target=update_scan_cache, args=(False,), daemon=True).start()
                 self.send_json(202, {"status": "scanning", "message": "Audit in progress..."})
                 return
+            refresh_live_containers(DATA_CACHE)
             self.send_json(200, DATA_CACHE)
+            return
+
+        if path == "/api/git/branches":
+            params = urllib.parse.parse_qs(parsed.query)
+            proj_name = params.get("project", [""])[0].strip()
+            approot, err = resolve_project_git_dir(proj_name)
+            if err:
+                self.send_json(400, {"success": False, "error": err})
+                return
+
+            git_info = get_git_info(approot) or {}
+            current_branch, branches, b_err = list_project_git_branches(approot)
+            if b_err:
+                self.send_json(500, {"success": False, "error": b_err})
+                return
+
+            if DATA_CACHE and "projects" in DATA_CACHE and proj_name in DATA_CACHE["projects"]:
+                DATA_CACHE["projects"][proj_name]["git"] = git_info
+                if git_info.get("branch"):
+                    DATA_CACHE["projects"][proj_name]["branch"] = git_info["branch"]
+
+            self.send_json(200, {
+                "success": True,
+                "project": proj_name,
+                "current_branch": current_branch or git_info.get("branch") or "",
+                "clean": bool(git_info.get("clean", False)),
+                "branches": branches
+            })
             return
 
         if path == "/api/project_logo":
@@ -268,6 +386,7 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
             self.send_json(500, {"success": False, "error": f"Server internal error: {err}"})
 
     def _handle_post(self, path, req_json):
+        global DATA_CACHE
         if path == "/api/refresh":
             Thread(target=update_scan_cache, args=(True,), daemon=True).start()
             self.send_json(200, {"status": "started", "message": "Refreshing disk audit..."})
@@ -296,7 +415,6 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                 self.send_json(400 if "root" in (err or "") else 404, {"error": err})
                 return
 
-            global DATA_CACHE
             if DATA_CACHE:
                 DATA_CACHE["db_dumps"]["dumps"] = [d for d in DATA_CACHE["db_dumps"]["dumps"] if d["path"] != target_path]
                 DATA_CACHE["giant_files"] = [g for g in DATA_CACHE["giant_files"] if g["path"] != target_path]
@@ -432,6 +550,112 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                         "stderr": "",
                         "duration": 0.1
                     })
+                    return
+            elif action == "git_fetch":
+                approot, err = resolve_project_git_dir(target)
+                if err:
+                    self.send_json(400, {"success": False, "error": err})
+                    return
+
+                t0 = time.time()
+                try:
+                    proc = subprocess.run(
+                        ["git", "fetch", "--all", "--prune"],
+                        cwd=approot,
+                        env=env,
+                        capture_output=True,
+                        text=True,
+                        timeout=45
+                    )
+                    dur = round(time.time() - t0, 2)
+                    updated_git = get_git_info(approot)
+                    if DATA_CACHE and "projects" in DATA_CACHE and target in DATA_CACHE["projects"] and updated_git:
+                        DATA_CACHE["projects"][target]["git"] = updated_git
+                        if updated_git.get("branch"):
+                            DATA_CACHE["projects"][target]["branch"] = updated_git["branch"]
+                    self.send_json(200, {
+                        "success": proc.returncode == 0,
+                        "exit_code": proc.returncode,
+                        "stdout": proc.stdout,
+                        "stderr": proc.stderr,
+                        "git": updated_git,
+                        "duration": dur,
+                        "command": "git fetch --all --prune"
+                    })
+                    return
+                except subprocess.TimeoutExpired:
+                    self.send_json(504, {"success": False, "error": "git fetch timed out after 45 seconds"})
+                    return
+                except Exception as e:
+                    self.send_json(500, {"success": False, "error": str(e)})
+                    return
+            elif action == "git_checkout_branch":
+                approot, err = resolve_project_git_dir(target)
+                if err:
+                    self.send_json(400, {"success": False, "error": err})
+                    return
+
+                req_branch = req_json.get("branch", "").strip()
+                if not req_branch:
+                    self.send_json(400, {"success": False, "error": "No target branch specified"})
+                    return
+
+                # Verify working tree is still clean before switching
+                git_info = get_git_info(approot) or {}
+                if not git_info.get("clean"):
+                    self.send_json(409, {
+                        "success": False,
+                        "error": f"Cannot switch branch: {target} has uncommitted or untracked changes."
+                    })
+                    return
+
+                # Resolve against actual repository refs (prevents arbitrary flag/ref injection)
+                _, branches, b_err = list_project_git_branches(approot)
+                if b_err:
+                    self.send_json(500, {"success": False, "error": b_err})
+                    return
+
+                matched = next(
+                    (b for b in branches if b["full_ref"] == req_branch or b["name"] == req_branch),
+                    None
+                )
+                if not matched:
+                    self.send_json(400, {"success": False, "error": f"Branch not found in repository: {req_branch}"})
+                    return
+
+                if matched["type"] == "local":
+                    git_cmd = ["git", "checkout", matched["name"]]
+                else:
+                    git_cmd = ["git", "checkout", "--track", matched["full_ref"]]
+
+                t0 = time.time()
+                try:
+                    proc = subprocess.run(
+                        git_cmd,
+                        cwd=approot,
+                        env=env,
+                        capture_output=True,
+                        text=True,
+                        timeout=30
+                    )
+                    dur = round(time.time() - t0, 2)
+                    updated_git = get_git_info(approot)
+                    if DATA_CACHE and "projects" in DATA_CACHE and target in DATA_CACHE["projects"] and updated_git:
+                        DATA_CACHE["projects"][target]["git"] = updated_git
+                        DATA_CACHE["projects"][target]["branch"] = updated_git.get("branch")
+                    self.send_json(200, {
+                        "success": proc.returncode == 0,
+                        "exit_code": proc.returncode,
+                        "stdout": proc.stdout,
+                        "stderr": proc.stderr,
+                        "branch": (updated_git or {}).get("branch") or matched["name"],
+                        "git": updated_git,
+                        "duration": dur,
+                        "command": " ".join(git_cmd)
+                    })
+                    return
+                except Exception as e:
+                    self.send_json(500, {"success": False, "error": str(e)})
                     return
             elif action == "ddev_build_dist":
                 if not target or not re.match(r"^[a-zA-Z0-9_\.-]+$", target):
@@ -590,6 +814,11 @@ class OrbitHTTPHandler(BaseHTTPRequestHandler):
                     self.send_json(400, {"error": "Invalid image name or ID"})
                     return
                 cmd = ["docker", "rmi", target]
+            elif action == "docker_volume_rm":
+                if not target or not re.match(r"^[a-zA-Z0-9_\.-]+$", target):
+                    self.send_json(400, {"error": "Invalid volume name"})
+                    return
+                cmd = ["docker", "volume", "rm", target]
             elif action == "docker_logs":
                 if not target or not re.match(r"^[a-zA-Z0-9_\.-]+$", target):
                     self.send_json(400, {"error": "Invalid container name"})
@@ -794,6 +1023,66 @@ end tell'''
                         "saved_str": format_bytes(size),
                         "stderr": "",
                         "duration": 0.2
+                    })
+                    return
+                else:
+                    self.send_json(500, {"error": err})
+                    return
+            elif action == "trash_dumps_batch":
+                paths = req_json.get("paths", [])
+                if not paths and target:
+                    paths = [p.strip() for p in target.split(";;") if p.strip()]
+                if not paths:
+                    self.send_json(400, {"error": "No paths provided"})
+                    return
+                trashed = []
+                total_freed = 0
+                for p in paths:
+                    ok, err, size = safe_trash_path(p)
+                    if ok:
+                        trashed.append(p)
+                        total_freed += size
+                if DATA_CACHE and "db_dumps" in DATA_CACHE:
+                    trashed_set = set(trashed)
+                    DATA_CACHE["db_dumps"]["dumps"] = [d for d in DATA_CACHE["db_dumps"]["dumps"] if d["path"] not in trashed_set]
+                    dumps = DATA_CACHE["db_dumps"]["dumps"]
+                    DATA_CACHE["db_dumps"]["total_dumps"] = len(dumps)
+                    total_size = sum(d["size"] for d in dumps)
+                    DATA_CACHE["db_dumps"]["total_dumps_size"] = total_size
+                    DATA_CACHE["db_dumps"]["total_dumps_size_str"] = format_bytes(total_size)
+                Thread(target=update_scan_cache, args=(True,), daemon=True).start()
+                self.send_json(200, {
+                    "success": True,
+                    "exit_code": 0,
+                    "stdout": f"Moved {len(trashed)} dumps to macOS ~/.Trash\n{format_bytes(total_freed)} reclaimed.",
+                    "saved_bytes": total_freed,
+                    "saved_str": format_bytes(total_freed),
+                    "stderr": "",
+                    "duration": 0.2
+                })
+                return
+            elif action == "trash_dump":
+                if not target:
+                    self.send_json(400, {"error": "No dump target specified"})
+                    return
+                ok, err, size = safe_trash_path(target)
+                if ok:
+                    if DATA_CACHE and "db_dumps" in DATA_CACHE:
+                        DATA_CACHE["db_dumps"]["dumps"] = [d for d in DATA_CACHE["db_dumps"]["dumps"] if d["path"] != target]
+                        dumps = DATA_CACHE["db_dumps"]["dumps"]
+                        DATA_CACHE["db_dumps"]["total_dumps"] = len(dumps)
+                        total_size = sum(d["size"] for d in dumps)
+                        DATA_CACHE["db_dumps"]["total_dumps_size"] = total_size
+                        DATA_CACHE["db_dumps"]["total_dumps_size_str"] = format_bytes(total_size)
+                    Thread(target=update_scan_cache, args=(True,), daemon=True).start()
+                    self.send_json(200, {
+                        "success": True,
+                        "exit_code": 0,
+                        "stdout": f"Moved {os.path.basename(target)} safely to macOS ~/.Trash\n{format_bytes(size)} reclaimed.",
+                        "saved_bytes": size,
+                        "saved_str": format_bytes(size),
+                        "stderr": "",
+                        "duration": 0.1
                     })
                     return
                 else:

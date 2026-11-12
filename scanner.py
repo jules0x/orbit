@@ -362,8 +362,8 @@ def get_git_info(approot):
         untracked = 0
         file_previews = []
         for line in proc.stdout.splitlines():
-            line = line.strip()
-            if not line:
+            line = line.rstrip("\r\n")
+            if not line.strip():
                 continue
             is_untracked = line.startswith("??")
             status_code = line[:2].strip()
@@ -373,7 +373,7 @@ def get_git_info(approot):
             else:
                 changed += 1
 
-            if len(file_previews) < 10:
+            if len(file_previews) < 50:
                 file_previews.append({
                     "status": status_code,
                     "file": filepath,
@@ -510,7 +510,9 @@ def get_project_branding(approot, name):
 def extract_project_urls(ddev_dir, default_name):
     """
     Parses additional_fqdns and additional_hostnames from .ddev/config.yaml
-    and any config.*.yaml files.
+    and any config.*.yaml override files (with config.local.yaml applied last).
+    When an override file defines additional_fqdns or additional_hostnames (including []),
+    it replaces the prior value just like DDEV does.
     Prefers 'local.*' style agency domains (e.g. local.tradingstandards.govt.nz),
     falling back to first additional_fqdn, additional_hostname, or <name>.ddev.site.
     """
@@ -518,11 +520,22 @@ def extract_project_urls(ddev_dir, default_name):
     hostnames = []
     cfg_files = [os.path.join(ddev_dir, "config.yaml")]
     try:
-        for f in os.listdir(ddev_dir):
-            if f.startswith("config.") and f.endswith(".yaml"):
-                cfg_files.append(os.path.join(ddev_dir, f))
+        extras = sorted(
+            f for f in os.listdir(ddev_dir)
+            if f.startswith("config.") and f.endswith(".yaml") and f not in ("config.yaml", "config.local.yaml")
+        )
+        cfg_files.extend(os.path.join(ddev_dir, f) for f in extras)
+        local_cfg = os.path.join(ddev_dir, "config.local.yaml")
+        if os.path.isfile(local_cfg):
+            cfg_files.append(local_cfg)
     except Exception:
         pass
+
+    def _parse_inline_yaml_list(raw_val):
+        cleaned = raw_val.split("#", 1)[0].strip() if "[" in raw_val else ""
+        if cleaned.startswith("[") and cleaned.endswith("]"):
+            return [x.strip().strip("'\"") for x in cleaned[1:-1].split(",") if x.strip()]
+        return None
 
     for cf in cfg_files:
         if not os.path.isfile(cf):
@@ -535,36 +548,40 @@ def extract_project_urls(ddev_dir, default_name):
                     stripped = line.strip()
                     if not stripped or stripped.startswith("#"):
                         continue
-                    if stripped.startswith("additional_fqdns:"):
-                        in_fqdns = True
-                        in_hostnames = False
+                    is_top_level = line[0] not in (" ", "\t")
+                    if is_top_level and stripped.startswith("additional_fqdns:"):
                         val = stripped.split("additional_fqdns:", 1)[1].strip()
-                        if val.startswith("[") and val.endswith("]"):
-                            items = [x.strip().strip("'\"") for x in val[1:-1].split(",") if x.strip()]
-                            for it in items:
-                                if it not in fqdns:
-                                    fqdns.append(it)
+                        inline_items = _parse_inline_yaml_list(val)
+                        if inline_items is not None:
+                            fqdns = inline_items
+                            in_fqdns = False
+                        else:
+                            # Block list follows (or empty key overrides prior values)
+                            fqdns = []
+                            in_fqdns = True
+                        in_hostnames = False
                         continue
-                    elif stripped.startswith("additional_hostnames:"):
-                        in_hostnames = True
-                        in_fqdns = False
+                    elif is_top_level and stripped.startswith("additional_hostnames:"):
                         val = stripped.split("additional_hostnames:", 1)[1].strip()
-                        if val.startswith("[") and val.endswith("]"):
-                            items = [x.strip().strip("'\"") for x in val[1:-1].split(",") if x.strip()]
-                            for it in items:
-                                if it not in hostnames:
-                                    hostnames.append(it)
+                        inline_items = _parse_inline_yaml_list(val)
+                        if inline_items is not None:
+                            hostnames = inline_items
+                            in_hostnames = False
+                        else:
+                            hostnames = []
+                            in_hostnames = True
+                        in_fqdns = False
                         continue
-                    elif line[0] not in (" ", "\t") and ":" in line:
+                    elif is_top_level and ":" in line:
                         in_fqdns = False
                         in_hostnames = False
 
                     if in_fqdns and stripped.startswith("-"):
-                        val = stripped.lstrip("-").strip().strip("'\"")
+                        val = stripped.lstrip("-").strip().split("#", 1)[0].strip().strip("'\"")
                         if val and val not in fqdns:
                             fqdns.append(val)
                     elif in_hostnames and stripped.startswith("-"):
-                        val = stripped.lstrip("-").strip().strip("'\"")
+                        val = stripped.lstrip("-").strip().split("#", 1)[0].strip().strip("'\"")
                         if val and val not in hostnames:
                             hostnames.append(val)
         except Exception:
@@ -678,8 +695,10 @@ def get_ddev_projects():
             if os.path.isfile(cfg_file):
                 try:
                     with open(cfg_file, "r", errors="ignore") as cf:
-                        for cl in cf:
-                            cl = cl.strip()
+                        for line in cf:
+                            if line.startswith(" ") or line.startswith("\t"):
+                                continue
+                            cl = line.strip()
                             if cl.startswith("php_version:"):
                                 p["php_version"] = cl.split(":", 1)[1].strip().strip('"\'')
                             elif cl.startswith("type:"):
@@ -762,6 +781,48 @@ def get_ddev_projects():
             p["branding"] = get_project_branding(approot, pname)
 
     return projects
+
+def refresh_live_containers(cache):
+    if not cache or "projects" not in cache:
+        return
+    try:
+        proc = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}"],
+            capture_output=True, text=True, timeout=3
+        )
+        if proc.returncode == 0:
+            running_set = set(line.strip() for line in proc.stdout.strip().split("\n") if line.strip())
+            if "docker" in cache:
+                cache["docker"]["running_containers"] = list(running_set)
+            for name, p in cache.get("projects", {}).items():
+                is_web_running = (f"ddev-{name}-web" in running_set)
+                search_is_running = any(
+                    (c == f"ddev-{name}-solr" or c == f"ddev-{name}-elasticsearch" or c == f"ddev-{name}-es" or c == f"ddev-{name}-opensearch" or f"{name}-solr" in c or f"{name}-elasticsearch" in c)
+                    for c in running_set
+                )
+                p["is_running"] = is_web_running
+                p["status"] = "running" if is_web_running else "stopped"
+                if p.get("search", {}).get("configured"):
+                    p["search"]["is_running"] = search_is_running
+    except Exception:
+        pass
+
+def parse_docker_size_bytes(size_str):
+    if not size_str:
+        return 0
+    s = size_str.strip().upper()
+    try:
+        if s.endswith("GB") or s.endswith("G"):
+            return int(float(s.rstrip("GB").rstrip("G")) * 1024 * 1024 * 1024)
+        if s.endswith("MB") or s.endswith("M"):
+            return int(float(s.rstrip("MB").rstrip("M")) * 1024 * 1024)
+        if s.endswith("KB") or s.endswith("K"):
+            return int(float(s.rstrip("KB").rstrip("K")) * 1024)
+        if s.endswith("B"):
+            return int(float(s.rstrip("B")))
+        return int(float(s))
+    except Exception:
+        return 0
 
 def get_docker_data(known_projects):
     volumes = []
@@ -854,15 +915,26 @@ def get_docker_data(known_projects):
                     
                     # Try matching project
                     matched_proj = None
-                    for proj_name in known_projects:
-                        if proj_name in repo or proj_name in tag:
-                            matched_proj = proj_name
-                            break
+                    if "-built" in tag:
+                        try:
+                            without_built = tag.rsplit("-built", 1)[0]
+                            if "-" in without_built:
+                                cand = without_built.split("-", 1)[1]
+                                matched_proj = cand
+                        except Exception:
+                            pass
+
+                    if not matched_proj:
+                        for proj_name in known_projects:
+                            if proj_name in repo or proj_name in tag:
+                                matched_proj = proj_name
+                                break
 
                     images.append({
                         "repository": repo,
                         "tag": tag,
                         "size_str": size_str,
+                        "size_bytes": parse_docker_size_bytes(size_str),
                         "id": img_id,
                         "is_ddev_custom": is_ddev_custom,
                         "is_dangling": is_dangling,
